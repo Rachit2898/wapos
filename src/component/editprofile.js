@@ -26,11 +26,13 @@ import GradientButton from "../utils/GradientButton";
 import { Updateprofile } from "../api/helper";
 import { getCurrentUser } from "../api/helper";
 import { StackActions } from "react-navigation";
+import { Base_URL_IMAGE } from "../api/constants";
 export default class Editprofile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       firstname: "",
+      imagePath: "",
       lastname: "",
       country: "",
       state: "",
@@ -38,8 +40,9 @@ export default class Editprofile extends React.Component {
       uri: "",
       updateimg: false,
       loading: false,
+      shouldRender: false,
     };
-    this.updateProfile = this.updateProfile.bind(this);
+    this.updateProfileValue = this.updateProfileValue.bind(this);
   }
   componentDidMount = async () => {
     const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
@@ -85,11 +88,17 @@ export default class Editprofile extends React.Component {
       </View>
     );
   }
-  updateProfile = async () => {
+  updateProfileValue = async () => {
     const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
     const { firstname, lastname, country, state, image } = this.state;
     console.log(firstname, lastname, country, state, image, "updwdgwdu");
-    Updateprofile(firstname, lastname, country, state, image)
+    if (!this.state.updateimg) {
+      const image1 = Base_URL_IMAGE + image;
+      this.setState({ imagePath: image1 });
+    } else {
+      this.setState({ imagePath: image });
+    }
+    Updateprofile(firstname, lastname, country, state, this.state.imagePath)
       .then((response) => response.json())
       .then((responseJson) => {
         getCurrentUser(TOKEN)
@@ -340,7 +349,7 @@ export default class Editprofile extends React.Component {
               </KeyboardAvoidingView>
               {this.state.loading == false ? null : this.renderButton()}
               <GradientButton
-                onPress={() => this.updateProfile()}
+                onPress={() => this.updateProfileValue()}
                 text={"UPDATE"}
                 color1={"#2145FE"}
                 color2={"#2145FE"}

@@ -1,72 +1,69 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   StyleSheet,
   Text,
   View,
   Image,
-  StatusBar,
   Dimensions,
   TouchableOpacity,
   FlatList,
   BackHandler,
+  StatusBar,
 } from "react-native";
 const { width: WIDTH } = Dimensions.get("window");
 import * as firebase from "firebase";
-import { ScrollView } from "react-native-gesture-handler";
-import Header from "../utils/Header";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { getSellerChat } from "../api/helper";
 import { Base_URL_IMAGE } from "../api/constants";
+import Header from "../utils/Header";
 import { SearchBar, ListItem } from "react-native-elements";
 import { StackActions } from "react-navigation";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-
-const Sellerchat = () => {
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [userlist, setUserList] = useState([]);
-  const [loginUserId, setLoginUserId] = useState("");
-  const [searchValue, setSearchValue] = useState("");
-  const [messageLength, setMessageLength] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    getChat();
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      handleBackButton
-    );
-    return () => {
-      backHandler.remove();
+export default class Sellerchat extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      phone: "",
+      Password: "",
+      userlist: [],
+      LOGINUSERID: "",
+      searchvalue: "",
+      messagelength: null,
+      messages: [],
     };
-  }, []);
-
-  const handleBackButton = () => {
+  }
+  componentDidMount() {
+    this.getChat();
+    BackHandler.addEventListener("hardwareBackPress", this.handleBackButton);
+  }
+  componentWillUnmount() {
+    BackHandler.removeEventListener("hardwareBackPress", this.handleBackButton);
+  }
+  handleBackButton = () => {
+    //add your code
     this.props.navigation.goBack();
-    return true; // Return true to prevent default back button behavior
+    return true;
   };
-
-  const getChat = async () => {
+  getChat = async () => {
     getSellerChat()
       .then((response) => response.json())
       .then((responseJson) => {
-        setUserList(responseJson);
+        this.setState({ userlist: responseJson, filterdata: responseJson });
         const chatRoomsCollection = firebase
           .firestore()
           .collection("chat_rooms");
 
+        // Attach an event listener for real-time updates
         const unsubscribe = chatRoomsCollection.onSnapshot((snapshot) => {
-          let messageFinal = [];
-          snapshot.docs.forEach((doc) => {
+          let message_final = [];
+          // this.getChat();
+          snapshot.docs.map((doc) => {
             const data = doc.data();
             const { nanoseconds, seconds } = data.updated_at;
             const date = new Date(seconds * 1000 + nanoseconds / 1000000);
-            messageFinal.push({
+            message_final.push({
               _id: data.id,
               text: data.last_message,
               createdAt: date,
@@ -76,81 +73,83 @@ const Sellerchat = () => {
               },
             });
           });
-          let sortArray = [];
+          let sortarray = [];
           for (let message of responseJson) {
-            let beforeSorting = [];
+            let beforesorting = [];
             let count = 0;
-            messageFinal.forEach((ele, index) => {
+            message_final.forEach((ele, index) => {
               if (
                 message.seller.firebase_user_uid +
-                  message.buyer.firebase_user_uid ===
+                  message.buyer.firebase_user_uid ==
                 ele._id
               ) {
-                beforeSorting.push(ele);
+                beforesorting.push(ele);
               }
-              if (messageFinal.length === index + 1) {
-                sortArray.push(beforeSorting, [count]);
+              if (message_final.length == index + 1) {
+                sortarray.push(beforesorting, [count]);
               }
             });
           }
-          sortArray.forEach((ele, index) => {
+          sortarray.forEach((ele, index) => {
             ele = ele.sort((a, b) => {
               const dateA = new Date(a.createdAt);
               const dateB = new Date(b.createdAt);
 
+              // Compare the dates based on their time
               if (dateA.toLocaleDateString() === dateB.toLocaleDateString()) {
+                // If the messages are from the same day, compare them by time
                 const timeA = dateA.toLocaleTimeString();
                 const timeB = dateB.toLocaleTimeString();
-                return timeB.localeCompare(timeA);
+                return timeB.localeCompare(timeA); // Reverse the comparison for ascending order
               } else {
+                // Group messages into "today" and "yesterday" categories
                 const today = new Date();
                 const yesterday = new Date(today);
-                yesterday.setDate(today.getDate() - 1);
+                yesterday.setDate(today.getDate() - 1); // Set the date to yesterday
 
                 if (dateA.toLocaleDateString() === today.toLocaleDateString()) {
-                  return -1;
+                  return -1; // Sort a to a lower index if it's from today
                 } else if (
                   dateB.toLocaleDateString() === today.toLocaleDateString()
                 ) {
-                  return 1;
+                  return 1; // Sort b to a lower index if it's from today
                 } else if (
                   dateA.toLocaleDateString() === yesterday.toLocaleDateString()
                 ) {
-                  return -1;
+                  return -1; // Sort a to a lower index if it's from yesterday
                 } else if (
                   dateB.toLocaleDateString() === yesterday.toLocaleDateString()
                 ) {
-                  return 1;
+                  return 1; // Sort b to a lower index if it's from yesterday
                 } else {
-                  return dateA - dateB;
+                  return dateA - dateB; // Sort by date if they are not from today or yesterday
                 }
               }
             });
           });
-          setMessages(sortArray);
+          this.setState({ messages: sortarray });
         });
 
+        // Clean up the event listener when the component unmounts
         return () => unsubscribe();
       })
       .catch((error) => {
         console.log(error);
       });
   };
-
-  const searchOnChange = (text) => {
-    setSearchValue(text);
-    const filteredData = filterdata.filter(
-      (user) =>
-        user.buyer.first_name.toLowerCase() +
-        user.buyer.last_name.toLowerCase().includes(text.toLowerCase())
+  SearchOnChange(text) {
+    this.setState({ searchvalue: text });
+    const filteredData = this.state.filterdata.filter((user) =>
+      (
+        user.buyer.first_name.toLowerCase() + user.buyer.last_name.toLowerCase()
+      ).includes(text.toLowerCase())
     );
-    setUserList(filteredData);
-  };
-
-  const renderItem = ({ item, index }) => (
+    this.setState({ userlist: filteredData });
+  }
+  renderItem = ({ item, index }) => (
     <TouchableOpacity
       onPress={() =>
-        navigation.navigate("Chatpage", {
+        this.props.navigation.navigate("Chatpage", {
           deal_id: item.deal_details.id,
           trip_id: item.trip.id,
           buyer_id: item.buyer.id,
@@ -180,8 +179,9 @@ const Sellerchat = () => {
             {item.buyer.first_name} {item.buyer.last_name}
           </ListItem.Title>
           <ListItem.Subtitle style={{ color: "gray" }}>
-            {messages.length > 0
-              ? messages[0].length > 0 && messages[0][0].text
+            {this.state.messages.length > 0
+              ? this.state.messages[0].length > 0 &&
+                this.state.messages[0][0].text
               : null}
           </ListItem.Subtitle>
         </ListItem.Content>
@@ -189,39 +189,44 @@ const Sellerchat = () => {
     </TouchableOpacity>
   );
 
-  return (
-    <View style={styles.container}>
-      <StatusBar backgroundColor={"#298ccf"} />
-      <Header onPress={() => navigation.goBack()} isHide={true} />
-      <View>
-        <Text
-          style={{
-            alignSelf: "center",
-            color: "white",
-            fontSize: 28,
-            marginTop: hp(-16),
-          }}
-        >
-          Seller Chats
-        </Text>
-      </View>
-      <View style={{ padding: wp("2%"), borderBottomColor: "white" }}>
-        <SearchBar
-          placeholder="Search contacts..."
-          value={searchValue}
-          onChangeText={(text) => searchOnChange(text)}
-          containerStyle={styles.searchBar}
+  render() {
+    return (
+      <View style={styles.container}>
+        <StatusBar backgroundColor={"#298ccf"} />
+        <Header
+          onPress={() => this.props.navigation.navigate("Search")}
+          isHide={true}
         />
-        <FlatList
-          data={userlist}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-        />
+        <View>
+          <Text
+            style={{
+              alignSelf: "center",
+              color: "white",
+              fontSize: 28,
+              marginTop: hp(-16),
+            }}
+          >
+            Seller Chats
+          </Text>
+        </View>
+        <View style={{ padding: wp("2%"), borderBottomColor: "white" }}>
+          <SearchBar
+            placeholder="Search contacts..."
+            value={this.state.searchvalue}
+            onChangeText={(text) => this.SearchOnChange(text)}
+            containerStyle={styles.searchBar}
+          />
+          <FlatList
+            data={this.state.userlist}
+            renderItem={this.renderItem}
+            keyExtractor={(item) => item.id.toString()}
+          />
+        </View>
+        {/* Add other UI components or actions as needed */}
       </View>
-      {/* Add other UI components or actions as needed */}
-    </View>
-  );
-};
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -391,5 +396,3 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 });
-
-export default Sellerchat;

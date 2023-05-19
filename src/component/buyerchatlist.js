@@ -43,8 +43,8 @@ export default class Buyerchat extends React.Component {
 
   componentWillUnmount() {
     BackHandler.removeEventListener("hardwareBackPress", this.handleBackButton);
-  }handleBackButton = () => {
-  
+  }
+  handleBackButton = () => {
     //add your code
 
     this.props.navigation.goBack();
@@ -169,6 +169,7 @@ export default class Buyerchat extends React.Component {
           matching_id: this.state.userlist[index].match,
           status: this.state.userlist[index].status,
           seller_page: false,
+          rowid: item.id,
           seller_price: this.state.userlist[index].seller_price,
           buyer_price: this.state.userlist[index].buyer_price,
           match_id: this.state.userlist[index].seller.firebase_user_uid,

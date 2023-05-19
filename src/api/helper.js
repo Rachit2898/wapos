@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { Base_URL } from "./constants";
+import { Base_URL, Base_URL_IMAGE } from "./constants";
 
 export const signup = async (email, password) => {
   const response = await fetch(`${Base_URL}register/`, {
@@ -279,6 +279,8 @@ export const UpdateAD = async (
   data.append("status", "Active");
   data.append("item_type", ITEM_ID);
   data.append("user", USER_ID);
+
+  console.log(data._parts);
   const response = await fetch(`${Base_URL}get_deal/${id}/`, {
     method: "PUT",
     headers: {
@@ -339,12 +341,12 @@ export const Updateprofile = async (
   profilephoto
 ) => {
   const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
-  const FirebaseID = AsyncStorage.getItem("currentUserFirebaseID");
+  const FirebaseID = await AsyncStorage.getItem("currentUserFirebaseID");
   const USER_ID = await AsyncStorage.getItem("currentUserID");
   const data = new FormData();
 
   data.append("id", USER_ID);
-  data.append("firebase_user_uid", FirebaseID._z);
+  data.append("firebase_user_uid", FirebaseID);
   data.append("profile_picture", {
     uri: profilephoto,
     type: "image/png",
@@ -355,16 +357,22 @@ export const Updateprofile = async (
   data.append("country", countryname);
   data.append("states", statename);
 
-  const response = await fetch(`${Base_URL}update_user_data/`, {
-    method: "PUT",
-    headers: {
-      Accept: "application/json",
-      "Content-type": "multipart/form-data",
-      Authorization: `Bearer ${TOKEN}`,
-    },
-    body: data,
-  });
-  return response;
+  try {
+    const response = await fetch(`${Base_URL}update_user_data/`, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-type": "multipart/form-data",
+        Authorization: `Bearer ${TOKEN}`,
+      },
+      body: data,
+    });
+
+    return response;
+  } catch (error) {
+    console.log("Error:", error);
+    throw error;
+  }
 };
 
 export const getOpenDealSingle = async (ITEM_ID) => {

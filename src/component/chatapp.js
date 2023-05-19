@@ -147,6 +147,7 @@ class Chatpage extends React.Component {
       currentuserId: await AsyncStorage.getItem("currentUserFirebaseID"),
     });
     if (this.props.route.params != undefined) {
+      // Update the component state based on the navigation params
       this.setState({ status: this.props.route.params.status });
       this.setState({
         fromValue: parseInt(this.props.route.params.buyer_price),
@@ -420,7 +421,7 @@ class Chatpage extends React.Component {
         this.setState({ modalVisible: false });
       });
   }
-  FromSlider(value) {
+  fromSlider = (value) => {
     this.setState({ fromValueselect: true });
     if (!this.props.route.params.seller_page) {
       this.setState({ fromValue: value });
@@ -465,7 +466,7 @@ class Chatpage extends React.Component {
         fromValue: parseInt(this.props.route.params.buyer_price),
       });
     }
-  }
+  };
   ClickOk = async () => {
     const deal_id = this.props.route.params.deal_id;
     const trip_id = this.props.route.params.trip_id;
@@ -517,7 +518,8 @@ class Chatpage extends React.Component {
       </View>
     );
   };
-  ToSlider(value) {
+  toSlider = (value) => {
+    console.log(value, this.props.route.params.seller_page);
     this.setState({ tovalueselect: true });
     if (this.props.route.params.seller_page) {
       this.setState({ toValue: value });
@@ -532,7 +534,6 @@ class Chatpage extends React.Component {
       const seller_price = parseFloat(value).toFixed(2);
       const final_price = "0.00";
       const Status = "";
-      console.log("tocalled");
       UpdateChatHeader(
         deal_id,
         trip_id,
@@ -560,7 +561,7 @@ class Chatpage extends React.Component {
     } else {
       this.setState({ slidervalue: this.state.toValue });
     }
-  }
+  };
   render() {
     return (
       <>
@@ -626,8 +627,8 @@ class Chatpage extends React.Component {
                 <RangeSlider
                   min={this.state.fromValue}
                   max={this.state.toValue}
-                  fromValueOnChange={(value) => this.FromSlider(value)}
-                  toValueOnChange={(value) => this.ToSlider(value)}
+                  fromValueOnChange={(value) => this.fromSlider(value)}
+                  toValueOnChange={(value) => this.toSlider(value)}
                   inRangeBarColor={"#D9DDE6"}
                   outOfRangeBarColor={"#44c7f3"}
                   fromKnobColor={"#ffffff"}
