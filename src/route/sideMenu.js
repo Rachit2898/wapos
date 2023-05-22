@@ -11,6 +11,9 @@ const App = () => {
     <NavigationContainer>
       <Drawer.Navigator
         initialRouteName="Route"
+        screenOptions={{
+          drawerType: "front",
+        }}
         drawerContent={(props) => <SideMenuDesign {...props} />}
       >
         <Drawer.Screen

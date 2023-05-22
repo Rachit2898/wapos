@@ -501,6 +501,7 @@ export const UpdateChatHeader = async (
   data.append("status", Status);
   // console.log(TOKEN)
   const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
+  console.log(TOKEN);
   const response = await fetch(`${Base_URL}update_chat_header/${rowid}/`, {
     method: "PUT",
     headers: {

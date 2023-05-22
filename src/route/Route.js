@@ -97,7 +97,7 @@ function Route() {
   return (
     <Stack.Navigator
       initialRouteName="login"
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: false, animation: "none" }}
     >
       <Stack.Screen name="Slider" component={Slider} />
       <Stack.Screen name="login" component={Login} />

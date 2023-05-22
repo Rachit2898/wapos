@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   ScrollView,
@@ -16,7 +16,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-
+import * as Device from "expo-device";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import * as firebase from "firebase";
@@ -29,7 +29,9 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function Login(props) {
   const [loading, setLoading] = useState(true);
+  const responseListener = useRef();
   const [accessToken, setAccessToken] = React.useState(null);
+  const [userIds, setUser] = React.useState("");
 
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId:
@@ -54,54 +56,70 @@ export default function Login(props) {
         console.log(error);
       });
   };
-  const registerForPushNotificationsAsync = async (user) => {
-    let token;
-    if (Platform.OS == "android") {
-      const { granted } = await Notifications.requestPermissionsAsync();
-      console.log(granted);
-      if (!granted) {
-        alert("Failed to get push token for push notification!");
-        return;
+  console.log(response?.type);
+  useEffect(() => {
+    registerForPushNotificationsAsync = async () => {
+      if (Device.isDevice) {
+        const { status: existingStatus } =
+          await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== "granted") {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+
+        if (finalStatus !== "granted") {
+          alert("Permission denied");
+        }
+        const token = (await Notifications.getDevicePushTokenAsync()).data;
+        console.log({ token }, { userIds });
+
+        const db = firebase.firestore();
+
+        if (!!userIds) {
+          const userRef = db.collection("users").doc(userIds);
+
+          const newData = {
+            sender_id: userIds,
+
+            expoPushToken: token,
+          };
+
+          userRef
+            .set(newData, { merge: true })
+            .then(() => {
+              alert("update sucess");
+              console.log("Document updated or created successfully");
+            })
+            .catch((error) => {
+              console.error("Error updating or creating document:", error);
+            });
+        }
       }
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-      alert(token);
-      const db = firebase.firestore();
 
-      const userId = user; // specify the document ID
-      const userRef = db.collection("users").doc(user); // create a reference to the document
-
-      // Specify the data to update or create
-      const newData = {
-        sender_id: userId,
-        // specify the fields and values to update or create
-        expoPushToken: token,
-      };
-
-      // Use set() with merge option to update or create the document
-      userRef
-        .set(newData, { merge: true })
-        .then(() => {
-          alert("update sucess");
-          console.log("Document updated or created successfully");
-        })
-        .catch((error) => {
-          console.error("Error updating or creating document:", error);
+      if (Platform.OS === "android") {
+        Notifications.setNotificationChannelAsync("default", {
+          name: "default",
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: "#FF231F7C",
         });
-    } else {
-      alert("Must use physical device for Push Notifications");
-    }
+      }
 
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
+      responseListener.current =
+        Notifications.addNotificationResponseReceivedListener((response) => {});
 
-    return token;
-  };
+      return () => {
+        Notifications.removeNotificationSubscription(
+          notificationListener.current
+        );
+        Notifications.removeNotificationSubscription(responseListener.current);
+      };
+    };
+
+    registerForPushNotificationsAsync();
+  }, [userIds]);
+
   const checkUserDetails = async (user) => {
     let idToken = await user.getIdToken(true);
 
@@ -121,9 +139,7 @@ export default function Login(props) {
           AsyncStorage.removeItem("currentUserStates");
           AsyncStorage.removeItem("currentUserRating");
           AsyncStorage.removeItem("currentUserStatus");
-          registerForPushNotificationsAsync(
-            responseJson.data.firebase_user_uid
-          );
+          setUser(responseJson.data.firebase_user_uid);
           AsyncStorage.setItem("currentUserFirebaseToken", idToken);
           AsyncStorage.setItem(
             "currentUserFirebaseID",

@@ -39,15 +39,6 @@ export default class Search extends React.Component {
 
   componentDidMount = async () => {
     const CHECK = await AsyncStorage.getItem("currentUserID");
-    BackHandler.addEventListener("hardwareBackPress", this.handleBackButton);
-  };
-  componentWillUnmount() {
-    BackHandler.removeEventListener("hardwareBackPress", this.handleBackButton);
-  }
-  handleBackButton = () => {
-    BackHandler.exitApp();
-
-    return true;
   };
 
   render() {

@@ -142,7 +142,6 @@ class Chatpage extends React.Component {
   }
 
   componentDidMount = async () => {
-    BackHandler.addEventListener("hardwareBackPress", this.handleBackButton);
     this.setState({
       currentuserId: await AsyncStorage.getItem("currentUserFirebaseID"),
     });
@@ -250,13 +249,7 @@ class Chatpage extends React.Component {
     // Clean up the event listener when the component unmounts
     return () => unsubscribe();
   };
-  componentWillUnmount() {
-    BackHandler.removeEventListener("hardwareBackPress", this.handleBackButton);
-  }
-  handleBackButton = () => {
-    this.props.navigation.goBack();
-    return true; // Return true to prevent default back button behavior
-  };
+
   onSend(messages = []) {
     const currentDate = new Date();
     const currentTimeNanos = performance.now() * 1e6;

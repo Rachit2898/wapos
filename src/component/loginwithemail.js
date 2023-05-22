@@ -54,54 +54,7 @@ export default class Loginwithemail extends React.Component {
       driverActiveStatus2: false,
     };
   }
-  registerForPushNotificationsAsync = async (user) => {
-    let token;
-    if (Platform.OS == "android") {
-      //     const { granted } = await Notifications.requestPermissionsAsync();
-      //     console.log(granted)
-      //   if (!granted) {
-      //     alert('Failed to get push token for push notification!');
-      //     return;
-      //   }
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-      alert(token);
-      const db = firebase.firestore();
 
-      const userId = user; // specify the document ID
-      const userRef = db.collection("users").doc(user); // create a reference to the document
-
-      // Specify the data to update or create
-      const newData = {
-        // specify the fields and values to update or create
-        expoPushToken: token,
-        sender_id: user,
-      };
-
-      // Use set() with merge option to update or create the document
-      userRef
-        .set(newData, { merge: true })
-        .then(() => {
-          alert("update sucess");
-          console.log("Document updated or created successfully");
-        })
-        .catch((error) => {
-          console.error("Error updating or creating document:", error);
-        });
-    } else {
-      alert("Must use physical device for Push Notifications");
-    }
-
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
-
-    return token;
-  };
   onChangeFunction(data) {
     if (data == true) {
       this.setState({ driverActiveStatus: false });
@@ -117,9 +70,7 @@ export default class Loginwithemail extends React.Component {
       .then((response) => response.json())
       .then((responseJson) => {
         let UID = `${responseJson.data.id}`;
-        this.registerForPushNotificationsAsync(
-          responseJson.data.firebase_user_uid
-        );
+
         console.log(idToken, "Token");
         AsyncStorage.setItem("currentUserFirebaseToken", idToken);
         AsyncStorage.setItem(
@@ -191,16 +142,6 @@ export default class Loginwithemail extends React.Component {
         .then((response) => {
           this.setState({ loading: false });
           this.checkUserDetails(response.user);
-          // const UID = firebase.auth().currentUser;
-          // alert(JSON.stringify(UID))
-          //   db.collection(`users`).get().then((querySnapshot) => {
-          //     querySnapshot.forEach((snapshot) => {
-          //       let data = snapshot.data();
-          //       if (data.id == UID) {
-
-          //       }
-          //     })
-          //   })
         })
         .catch((error) => {
           this.setState({ loading: false });

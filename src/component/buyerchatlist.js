@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -22,54 +22,36 @@ import { Base_URL_IMAGE } from "../api/constants";
 import { SearchBar, ListItem } from "react-native-elements";
 import { StackActions } from "react-navigation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-export default class Buyerchat extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      phone: "",
-      Password: "",
-      userlist: [],
-      LOGINUSERID: "",
-      searchvalue: "",
-      messagelength: null,
-      messages: [],
-      filterdata: [],
-    };
-  }
-  componentDidMount() {
-    this.getChat();
-    BackHandler.addEventListener("hardwareBackPress", this.handleBackButton);
-  }
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 
-  componentWillUnmount() {
-    BackHandler.removeEventListener("hardwareBackPress", this.handleBackButton);
-  }
-  handleBackButton = () => {
-    //add your code
+const Buyerchat = () => {
+  const isFocused = useIsFocused();
+  const [userlist, setUserList] = useState([]);
+  const [LOGINUSERID, setLoginUserId] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [filterData, setFilterData] = useState([]);
+  const navigation = useNavigation();
 
-    this.props.navigation.goBack();
-    return true;
-  };
-  getChat = async () => {
-    this.setState({
-      LOGINUSERID: await AsyncStorage.getItem("currentUserFirebaseID"),
-    });
-    getBuyerChat()
+  const getChat = async () => {
+    setLoginUserId(await AsyncStorage.getItem("currentUserFirebaseID"));
+    await getBuyerChat()
       .then((response) => response.json())
       .then((responseJson) => {
-        this.setState({ userlist: responseJson, filterdata: responseJson });
+        setUserList(responseJson);
+        setFilterData(responseJson);
         const chatRoomsCollection = firebase
           .firestore()
           .collection("chat_rooms");
 
         // Attach an event listener for real-time updates
         const unsubscribe = chatRoomsCollection.onSnapshot((snapshot) => {
-          let message_final = [];
+          let messageFinal = [];
           snapshot.docs.map((doc) => {
             const data = doc.data();
             const { nanoseconds, seconds } = data.updated_at;
             const date = new Date(seconds * 1000 + nanoseconds / 1000000);
-            message_final.push({
+            messageFinal.push({
               _id: data.id,
               text: data.last_message,
               createdAt: date,
@@ -79,30 +61,27 @@ export default class Buyerchat extends React.Component {
               },
             });
           });
-          let sortarray = [];
+          let sortArray = [];
           for (let message of responseJson) {
-            let beforesorting = [];
+            let beforeSorting = [];
             let count = 0;
-            message_final.forEach((ele, index) => {
+            messageFinal.forEach((ele, index) => {
               if (
                 message.seller.firebase_user_uid +
                   message.buyer.firebase_user_uid ==
                 ele._id
               ) {
-                if (
-                  ele.sender_id != this.state.LOGINUSERID &&
-                  ele.status == "sent"
-                ) {
+                if (ele.sender_id != LOGINUSERID && ele.status == "sent") {
                   count = count + 1;
                 }
-                beforesorting.push(ele);
+                beforeSorting.push(ele);
               }
-              if (message_final.length == index + 1) {
-                sortarray.push(beforesorting, [count]);
+              if (messageFinal.length == index + 1) {
+                sortArray.push(beforeSorting, [count]);
               }
             });
           }
-          sortarray.forEach((ele, index) => {
+          sortArray.forEach((ele, index) => {
             ele = ele.sort((a, b) => {
               const dateA = new Date(a.createdAt);
               const dateB = new Date(b.createdAt);
@@ -139,49 +118,58 @@ export default class Buyerchat extends React.Component {
               }
             });
           });
-          this.setState({ messages: sortarray });
+          setMessages(sortArray);
         });
 
         return () => unsubscribe();
       })
-      .catch((error) => {
-        console.log(error);
-      });
+      .catch((error) => {});
   };
-  SearchOnChange(text) {
-    this.setState({ searchvalue: text });
-    const filteredData = this.state.filterdata.filter((user) =>
-      (
+
+  useEffect(() => {
+    getChat();
+  }, [isFocused]);
+  useEffect(() => {
+    getChat();
+  }, []);
+
+  const handleBackButton = () => {
+    navigation.goBack;
+  };
+
+  const searchOnChange = (text) => {
+    setSearchValue(text);
+    const filteredData = filterData.filter(
+      (user) =>
         user.seller.first_name.toLowerCase() +
-        user.seller.last_name.toLowerCase()
-      ).includes(text.toLowerCase())
+        user.seller.last_name.toLowerCase().includes(text.toLowerCase())
     );
-    this.setState({ userlist: filteredData });
-  }
-  renderItem = ({ item, index }) => (
+    setUserList(filteredData);
+  };
+
+  const renderItem = ({ item, index }) => (
     <TouchableOpacity
       onPress={() =>
-        this.props.navigation.navigate("Chatpage", {
-          deal_id: this.state.userlist[index].deal_details.id,
-          trip_id: this.state.userlist[index].trip.id,
-          buyer_id: this.state.userlist[index].buyer.id,
-          seller_id: this.state.userlist[index].seller.id,
-          matching_id: this.state.userlist[index].match,
-          status: this.state.userlist[index].status,
+        navigation.navigate("Chatpage", {
+          deal_id: userlist[index].deal_details.id,
+          trip_id: userlist[index].trip.id,
+          buyer_id: userlist[index].buyer.id,
+          seller_id: userlist[index].seller.id,
+          matching_id: userlist[index].match,
+          status: userlist[index].status,
           seller_page: false,
           rowid: item.id,
-          seller_price: this.state.userlist[index].seller_price,
-          buyer_price: this.state.userlist[index].buyer_price,
-          match_id: this.state.userlist[index].seller.firebase_user_uid,
-          create_id: this.state.userlist[index].buyer.firebase_user_uid,
-          match_image: this.state.userlist[index].seller.profile_picture,
+          seller_price: userlist[index].seller_price,
+          buyer_price: userlist[index].buyer_price,
+          match_id: userlist[index].seller.firebase_user_uid,
+          create_id: userlist[index].buyer.firebase_user_uid,
+          match_image: userlist[index].seller.profile_picture,
           match_name:
-            this.state.userlist[index].seller.first_name +
-            this.state.userlist[index].seller.last_name,
-          create_image: this.state.userlist[index].buyer.profile_picture,
+            userlist[index].seller.first_name +
+            userlist[index].seller.last_name,
+          create_image: userlist[index].buyer.profile_picture,
           create_name:
-            this.state.userlist[index].buyer.first_name +
-            this.state.userlist[index].seller.last_name,
+            userlist[index].buyer.first_name + userlist[index].seller.last_name,
         })
       }
     >
@@ -195,54 +183,47 @@ export default class Buyerchat extends React.Component {
             {item.seller.first_name} {item.seller.last_name}
           </ListItem.Title>
           <ListItem.Subtitle style={{ color: "gray" }}>
-            {this.state.messages.length > 0
-              ? this.state.messages[0].length > 0 &&
-                this.state.messages[0][0].text
+            {messages.length > 0
+              ? messages[0].length > 0 && messages[0][0].text
               : null}
           </ListItem.Subtitle>
         </ListItem.Content>
-        {/* <Badge status="success" value={this.state.messages.length>0?this.state.messages[1][0]:0} /> */}
       </ListItem>
     </TouchableOpacity>
   );
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Header
-          onPress={() => this.props.navigation.navigate("Search")}
-          isHide={true}
-        />
-        <View>
-          <Text
-            style={{
-              alignSelf: "center",
-              color: "white",
-              fontSize: 28,
-              marginTop: hp(-16),
-            }}
-          >
-            Buyer Chats
-          </Text>
-        </View>
-        <View style={{ padding: wp("2%"), borderBottomColor: "white" }}>
-          <SearchBar
-            placeholder="Search buyers..."
-            value={this.state.searchvalue}
-            onChangeText={(newText) => this.SearchOnChange(newText)}
-            containerStyle={styles.searchBar}
-          />
-          <FlatList
-            data={this.state.userlist}
-            renderItem={this.renderItem}
-            keyExtractor={(item) => item.id.toString()}
-          />
-        </View>
-        {/* Add other UI components or actions as needed */}
+  return (
+    <View style={styles.container}>
+      <Header onPress={() => navigation.goBack()} isHide={true} />
+      <View>
+        <Text
+          style={{
+            alignSelf: "center",
+            color: "white",
+            fontSize: 28,
+            marginTop: hp(-16),
+          }}
+        >
+          Buyer Chats
+        </Text>
       </View>
-    );
-  }
-}
+      <View style={{ padding: wp("2%"), borderBottomColor: "white" }}>
+        <SearchBar
+          placeholder="Search buyers..."
+          value={searchValue}
+          onChangeText={(newText) => searchOnChange(newText)}
+          containerStyle={styles.searchBar}
+        />
+        <FlatList
+          data={userlist}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      </View>
+      {/* Add other UI components or actions as needed */}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -415,3 +396,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 });
+
+export default Buyerchat;
