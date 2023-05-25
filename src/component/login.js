@@ -38,6 +38,8 @@ export default function Login(props) {
       "447919629992-kb0tbb7k67h3thrfr9m6mkb7sfpbbgfa.apps.googleusercontent.com",
     androidClientId:
       "447919629992-54cajcrnkt8pnna90gjln5etluh30ppu.apps.googleusercontent.com",
+    iosClientId:
+      "447919629992-afaicloopdif4uck9klo15j7bs1af0p7.apps.googleusercontent.com",
   });
 
   const checkAuthRegister = async (user) => {
