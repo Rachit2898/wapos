@@ -73,7 +73,6 @@ export default function Login(props) {
         } else {
           var token = (await Notifications.getDevicePushTokenAsync()).data;
 
-          console.log({ token });
           if (!!token) {
             await pushNotifications(token);
           }
