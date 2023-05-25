@@ -23,7 +23,7 @@ import * as firebase from "firebase";
 import * as Notifications from "expo-notifications";
 import Toast from "react-native-toast-message";
 import GradientButton from "../utils/GradientButton";
-import { googleLogin, getCurrentUser } from "../api/helper";
+import { googleLogin, getCurrentUser, pushNotifications } from "../api/helper";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -33,15 +33,11 @@ export default function Login(props) {
   const [accessToken, setAccessToken] = React.useState(null);
   const [userIds, setUser] = React.useState("");
 
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId:
-      "104205684075-69rrt9jmls530tlj07ve7p0l96a2in4t.apps.googleusercontent.com",
-    androidClientId:
-      "104205684075-ijp41lo37jgjj78f4m0hnokjnu4sn52l.apps.googleusercontent.com",
-    iosClientId:
-      "104205684075-ikvv1e3at2fhmeud4qs7vc0drqhu1cpd.apps.googleusercontent.com",
+  const [request, response, promptAsync] = Google.useAuthRequest({
     expoClientId:
-      "104205684075-69rrt9jmls530tlj07ve7p0l96a2in4t.apps.googleusercontent.com",
+      "447919629992-kb0tbb7k67h3thrfr9m6mkb7sfpbbgfa.apps.googleusercontent.com",
+    androidClientId:
+      "447919629992-54cajcrnkt8pnna90gjln5etluh30ppu.apps.googleusercontent.com",
   });
 
   const checkAuthRegister = async (user) => {
@@ -56,44 +52,51 @@ export default function Login(props) {
         console.log(error);
       });
   };
-  console.log(response?.type);
+
   useEffect(() => {
     registerForPushNotificationsAsync = async () => {
       if (Device.isDevice) {
         const { status: existingStatus } =
           await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
+
         if (existingStatus !== "granted") {
           const { status } = await Notifications.requestPermissionsAsync();
           finalStatus = status;
         }
 
         if (finalStatus !== "granted") {
-          alert("Permission denied");
-        }
-        const token = (await Notifications.getDevicePushTokenAsync()).data;
-        console.log({ token }, { userIds });
+          alert("Notifications permission denied");
+          return;
+        } else {
+          var token = (await Notifications.getDevicePushTokenAsync()).data;
 
-        const db = firebase.firestore();
+          console.log({ token });
+          if (!!token) {
+            await pushNotifications(token);
+          }
 
-        if (!!userIds) {
-          const userRef = db.collection("users").doc(userIds);
+          const db = firebase.firestore();
 
-          const newData = {
-            sender_id: userIds,
+          if (!!userIds) {
+            const userRef = db.collection("users").doc(userIds);
 
-            expoPushToken: token,
-          };
+            const newData = {
+              sender_id: userIds,
 
-          userRef
-            .set(newData, { merge: true })
-            .then(() => {
-              alert("update sucess");
-              console.log("Document updated or created successfully");
-            })
-            .catch((error) => {
-              console.error("Error updating or creating document:", error);
-            });
+              expoPushToken: token,
+            };
+
+            userRef
+              .set(newData, { merge: true })
+              .then(() => {
+                alert("update sucess");
+                console.log("Document updated or created successfully");
+              })
+              .catch((error) => {
+                console.error("Error updating or creating document:", error);
+              });
+          }
         }
       }
 
@@ -118,7 +121,7 @@ export default function Login(props) {
     };
 
     registerForPushNotificationsAsync();
-  }, [userIds]);
+  }, [userIds, accessToken]);
 
   const checkUserDetails = async (user) => {
     let idToken = await user.getIdToken(true);
@@ -140,6 +143,7 @@ export default function Login(props) {
           AsyncStorage.removeItem("currentUserRating");
           AsyncStorage.removeItem("currentUserStatus");
           setUser(responseJson.data.firebase_user_uid);
+
           AsyncStorage.setItem("currentUserFirebaseToken", idToken);
           AsyncStorage.setItem(
             "currentUserFirebaseID",
@@ -202,13 +206,14 @@ export default function Login(props) {
     });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     checkAuth();
 
     if (response?.type === "success") {
       const { id_token } = response.params;
+
       const credential = firebase.auth.GoogleAuthProvider.credential(id_token);
-      const auth = firebase.auth();
+
       firebase
         .auth()
         .signInWithCredential(credential)
@@ -222,7 +227,7 @@ export default function Login(props) {
           }
         });
     }
-  }, [response, accessToken]);
+  }, [response]);
 
   const login = () => {
     props.navigation.navigate("#");

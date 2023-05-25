@@ -91,13 +91,22 @@ export default class Editprofile extends React.Component {
   updateProfileValue = async () => {
     const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
     const { firstname, lastname, country, state, image } = this.state;
-    console.log(firstname, lastname, country, state, image, "updwdgwdu");
+    console.log(
+      firstname,
+      lastname,
+      country,
+      state,
+      image,
+      this.state.updateimg,
+      "updwdgwdu"
+    );
     if (!this.state.updateimg) {
       const image1 = Base_URL_IMAGE + image;
       this.setState({ imagePath: image1 });
     } else {
       this.setState({ imagePath: image });
     }
+    console.log(firstname, lastname, country, state, this.state.imagePath);
     Updateprofile(firstname, lastname, country, state, this.state.imagePath)
       .then((response) => response.json())
       .then((responseJson) => {
@@ -145,6 +154,7 @@ export default class Editprofile extends React.Component {
               `${responseJsonuser.data.status}`
             );
             if (responseJson.error != undefined) {
+              console.log("here", responseJson.error);
               alert(responseJson.error);
             } else {
               alert(responseJson.message);

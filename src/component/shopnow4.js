@@ -71,7 +71,7 @@ export default class Shopnow4 extends React.Component {
       }
     }
   }
-  move() {
+  move = () => {
     const {
       productName,
       uri,
@@ -87,6 +87,8 @@ export default class Shopnow4 extends React.Component {
       itemWeight,
       sellerFee,
     } = this.state;
+
+    console.log(productName, "asmbweyufg3uinax");
 
     if (comment === "") {
       Alert.alert("Empty Field!", "Please enter your comment");
@@ -133,7 +135,7 @@ export default class Shopnow4 extends React.Component {
         this.setState({ loader: false });
         console.log(error);
       });
-  }
+  };
 
   postData = async (ITEM_ID) => {
     if (this.state.data == null) {

@@ -18,6 +18,7 @@ import {
   PanResponder,
   TouchableHighlightBase,
 } from "react-native";
+import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import { Base_URL_IMAGE } from "../api/constants";
 import {
@@ -29,7 +30,7 @@ import { TextInput } from "react-native-paper";
 
 import RangeSlider from "react-native-range-slider-expo";
 import * as Notifications from "expo-notifications";
-import { UpdateChatHeader } from "../api/helper";
+import { UpdateChatHeader, sendNotification } from "../api/helper";
 import { StackActions } from "react-navigation";
 // Notifications.se({});
 Notifications.setNotificationHandler({
@@ -57,6 +58,8 @@ class Chatpage extends React.Component {
       status: "",
       fromValueselect: false,
       tovalueselect: false,
+      pushToken: "",
+      sellerName: "",
     };
   }
   // to send and receive the messages with updated status
@@ -133,6 +136,7 @@ class Chatpage extends React.Component {
               this.setState({ expotoken: user.expoPushToken });
             }
           }
+
           usersList.push(user);
         });
       })
@@ -147,6 +151,9 @@ class Chatpage extends React.Component {
     });
     if (this.props.route.params != undefined) {
       // Update the component state based on the navigation params
+
+      this.setState({ pushToken: this.props.route.params.pushToken });
+      this.setState({ sellerName: this.props.route.params.sellerName });
       this.setState({ status: this.props.route.params.status });
       this.setState({
         fromValue: parseInt(this.props.route.params.buyer_price),
@@ -188,10 +195,11 @@ class Chatpage extends React.Component {
               name = imageele.name;
             }
           });
+
           const { nanoseconds, seconds } = data.updated_at;
           const date = new Date(seconds * 1000 + nanoseconds / 1000000);
           message_final.push({
-            _id: uuidv4(),
+            _id: data.id + uuidv4(),
             text: data.last_message,
             createdAt: date,
             status: data.status,
@@ -282,10 +290,21 @@ class Chatpage extends React.Component {
         seconds: currentTimeSeconds,
       },
     };
+    console.log(
+      "sendClicke",
+      this.state.pushToken,
+      messages[0].text,
+      this.state.sellerName
+    );
+    sendNotification(
+      this.state.pushToken,
+      messages[0].text,
+      this.state.sellerName
+    );
     messagesCollectionRef
       .add(newMessageData)
       .then((docRef) => {
-        this.sendPushNotification(this.state.expotoken, messages[0].text);
+        // this.sendPushNotification(this.state.expotoken, messages[0].text);
         // Handle success, if needed
       })
       .catch((error) => {
@@ -512,7 +531,6 @@ class Chatpage extends React.Component {
     );
   };
   toSlider = (value) => {
-    console.log(value, this.props.route.params.seller_page);
     this.setState({ tovalueselect: true });
     if (this.props.route.params.seller_page) {
       this.setState({ toValue: value });

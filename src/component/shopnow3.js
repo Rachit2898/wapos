@@ -75,6 +75,7 @@ export default class Shopnow3 extends React.Component {
       return;
     } else {
       const ITEM_PRICE = parseInt(itemCost) * parseInt(itemQuantity);
+      console.log(productName, "nsbcguvcjnxsiuchdeicj");
       this.props.navigation.navigate("shopnow4", {
         PRODUCT_NAME: productName,
         PRODUCT_IMAGE: uri,

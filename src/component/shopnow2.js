@@ -53,6 +53,8 @@ export default class Shopnow2 extends React.Component {
       return;
     }
 
+    console.log(productName, "scbdjkwcbhnmdnc");
+
     this.props.navigation.navigate("shopnow3", {
       PRODUCT_NAME: productName,
       PRODUCT_IMAGE: uri,

@@ -40,7 +40,7 @@ export default class Shopnow extends React.Component {
       return;
     }
     {
-      console.log("hello", this.state.data);
+      console.log("hello", this.state.data, productName);
     }
     this.props.navigation.navigate("shopnowimg", {
       PRODUCT_NAME: productName,

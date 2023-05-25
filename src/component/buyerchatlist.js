@@ -130,12 +130,16 @@ const Buyerchat = () => {
     getChat();
   }, [isFocused]);
   useEffect(() => {
-    getChat();
-  }, []);
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        navigation.goBack(); // Invoke the goBack function by adding parentheses
+        return true;
+      }
+    );
 
-  const handleBackButton = () => {
-    navigation.goBack;
-  };
+    return () => backHandler.remove();
+  }, []);
 
   const searchOnChange = (text) => {
     setSearchValue(text);
@@ -159,6 +163,8 @@ const Buyerchat = () => {
           status: userlist[index].status,
           seller_page: false,
           rowid: item.id,
+          pushToken: userlist[index].seller.push_notification_id,
+          sellerName: userlist[index].buyer.first_name,
           seller_price: userlist[index].seller_price,
           buyer_price: userlist[index].buyer_price,
           match_id: userlist[index].seller.firebase_user_uid,

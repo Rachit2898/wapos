@@ -20,8 +20,8 @@
     "ios": {
       "supportsTablet": true,
       "usesAppleSignIn": true,
-      "bundleIdentifier": "com.wapos.wapos",
-      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.wapos.wapos"
+     
       
     },
     "android": {

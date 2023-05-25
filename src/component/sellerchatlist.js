@@ -37,19 +37,19 @@ const Sellerchat = () => {
 
   useEffect(() => {
     getChat();
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      handleBackButton
-    );
-    return () => {
-      backHandler.remove();
-    };
   }, [isFocused]);
 
-  const handleBackButton = () => {
-    navigation.goBack();
-    return true;
-  };
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        navigation.goBack(); // Invoke the goBack function by adding parentheses
+        return true;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   const getChat = async () => {
     getSellerChat()

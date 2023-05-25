@@ -65,6 +65,7 @@ export default class Loginwithemail extends React.Component {
 
   checkUserDetails = async (user) => {
     let idToken = await user.getIdToken(true);
+    console.log(idToken);
 
     getCurrentUser(idToken)
       .then((response) => response.json())

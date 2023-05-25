@@ -93,6 +93,8 @@ export default class Shopnowimg extends React.Component {
       return;
     }
 
+    console.log(productName, "usriiii");
+
     this.props.navigation.navigate("shopnow1", {
       PRODUCT_NAME: productName,
       PRODUCT_IMAGE: uri,

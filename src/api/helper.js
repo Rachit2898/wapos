@@ -33,6 +33,7 @@ export const login = async (email, password) => {
 };
 
 export const googleLogin = async (TOKEN) => {
+  console.log("helperToken", TOKEN);
   const response = await fetch(`${Base_URL}register/`, {
     method: "POST",
     headers: {
@@ -216,6 +217,8 @@ export const postAD = async (
 
   const data = new FormData();
 
+  console.log("namee", productName);
+
   data.append("product_name", productName);
   data.append("product_image", {
     uri: uri,
@@ -233,6 +236,8 @@ export const postAD = async (
   data.append("item_type", ITEM_ID);
   data.append("user", USER_ID);
 
+  console.log("isTht", data._parts);
+
   const response = await fetch(`${Base_URL}manage_deal/`, {
     method: "POST",
     headers: {
@@ -245,6 +250,31 @@ export const postAD = async (
 
   return response;
 };
+export const pushNotifications = async (push_notification_id) => {
+  const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
+
+  console.log({ TOKEN });
+
+  try {
+    const response = await fetch(
+      `http://103.204.131.97:8767/api/v1/update_push_notification/`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `JWT ${TOKEN}`,
+        },
+        body: JSON.stringify({ push_notification_id: push_notification_id }),
+      }
+    );
+    console.log("hellllloooooo", response, response.status);
+
+    return response;
+  } catch (error) {
+    console.error("Network request failed:", error);
+  }
+};
+
 export const UpdateAD = async (
   productName,
   uri,
@@ -262,7 +292,6 @@ export const UpdateAD = async (
   const USER_ID = await AsyncStorage.getItem("currentUserID");
 
   const data = new FormData();
-
   data.append("product_name", productName);
   data.append("product_image", {
     uri: uri,
@@ -280,7 +309,6 @@ export const UpdateAD = async (
   data.append("item_type", ITEM_ID);
   data.append("user", USER_ID);
 
-  console.log(data._parts);
   const response = await fetch(`${Base_URL}get_deal/${id}/`, {
     method: "PUT",
     headers: {
@@ -320,6 +348,28 @@ export const getFlightDetails = async () => {
 
   return response;
 };
+
+export const sendNotification = async (pushToken, text, heading) => {
+  console.log("Send notification", pushToken, text, heading);
+  const response = await fetch("https://fcm.googleapis.com/fcm/send", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization:
+        "key=AAAAaEoXJqg:APA91bG1VcYZYa-UfWMiiCYOkP9h6MZpHGYAUa4sjJRh2Tbh8ZBtqldBnniIh-XlDHrQIH3ocpHyRNUSdBThI8AnT_vc8247kz7pMvxNZgzANqhi5dgffARl-bNMVVJ9qIgGi_GDcT2I",
+    },
+    body: JSON.stringify({
+      to: `${pushToken}`,
+      priority: "normal",
+      data: {
+        title: `${heading}`,
+        message: `${text}`,
+      },
+    }),
+  });
+  console.log("nbsdhjvfhjebfhjewvfhvcghdvchdsv", response);
+};
+
 export const getDealHistory = async () => {
   const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
 
@@ -367,6 +417,8 @@ export const Updateprofile = async (
       },
       body: data,
     });
+
+    console.log(response, data._parts);
 
     return response;
   } catch (error) {
@@ -417,7 +469,7 @@ export const getSellerChat = async () => {
 };
 export const getBuyerChat = async () => {
   const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
-  // console.log(TOKEN)
+  console.log(TOKEN);
   const response = await fetch(`${Base_URL}get_buyer_chat_header/`, {
     method: "GET",
     headers: {

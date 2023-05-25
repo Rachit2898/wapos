@@ -57,11 +57,7 @@ export default class Shopnow1 extends React.Component {
   }
 
   handleBackButton = () => {
-    const pushAction = StackActions.pop({
-      n: 1,
-    });
-
-    this.props.navigation.dispatch(pushAction);
+    this.props.navigation.goBack();
     return true;
   };
 
@@ -72,6 +68,8 @@ export default class Shopnow1 extends React.Component {
       Alert.alert("Empty Field!", "Please enter your country name");
       return;
     }
+
+    console.log(productName, "nbchcbhcbhrcb");
 
     this.props.navigation.navigate("shopnow2", {
       PRODUCT_NAME: productName,
