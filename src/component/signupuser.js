@@ -65,7 +65,7 @@ export default class Signupuser extends React.Component {
           "Congratulations!",
           "Your account has been registered. Please login to your account"
         );
-        this.props.navigation.goBack(null);
+        this.props.navigation.goBack();
       })
       .catch((error) => {
         console.log(error);
@@ -238,12 +238,13 @@ export default class Signupuser extends React.Component {
             <View
               style={{
                 flexDirection: "row",
-                paddingLeft: 0,
+                paddingLeft: 30,
                 marginTop: 30,
-                alignSelf: "center",
+                alignItems: "center",
+                marginLeft: 10,
               }}
             >
-              <View style={{ width: "10%", marginTop: -26 }}>
+              <View style={{}}>
                 <Switch
                   style={styles.switchAlignStyle}
                   value={this.state.driverActiveStatus}
@@ -426,6 +427,5 @@ const styles = StyleSheet.create({
 
   switchAlignStyle: {
     alignContent: "center",
-    marginTop: 15,
   },
 });

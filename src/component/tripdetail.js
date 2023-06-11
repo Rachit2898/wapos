@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,11 +8,11 @@ import {
   Dimensions,
   TouchableOpacity,
   ImageBackground,
-  KeyboardAvoidingView,
+  Platform,
   Alert,
+  Pressable,
+  KeyboardAvoidingView,
 } from "react-native";
-const { width: WIDTH } = Dimensions.get("window");
-const { height: Height } = Dimensions.get("window");
 import { ScrollView } from "react-native-gesture-handler";
 import { TextInput } from "react-native-paper";
 import {
@@ -24,156 +24,133 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import GradientButton from "../utils/GradientButton";
 import { StackActions } from "react-navigation";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import DatePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 import { getFlightDetails } from "../api/helper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default class Tripdetail extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      ticketNumber: "",
-      arrivalDestinationDate: "",
-      arrivalDestinationAirport: "",
-      pnrNumber: "",
-      data: null,
-    };
-  }
+const { width: WIDTH, height: Height } = Dimensions.get("window");
 
-  onChangeFunction(data) {
-    if (data == true) {
-      this.setState({ driverActiveStatus: false });
-    } else if (data == false) {
-      this.setState({ driverActiveStatus: true });
-    }
-  }
-  componentDidMount() {
-    this.backHandler = BackHandler.addEventListener(
+const Tripdetail = ({ navigation, route }) => {
+  const [ticketNumber, setTicketNumber] = useState("");
+  const [arrivalDestinationDate, setArrivalDestinationDate] = useState("");
+  const [arrivalDestinationAirport, setArrivalDestinationAirport] =
+    useState("");
+  const [pnrNumber, setPnrNumber] = useState("");
+  const [data, setData] = useState(null);
+  const [isVisibleTo, setIsVisibleTo] = useState(false);
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      this.handleBackButton
+      handleBackButton
     );
 
-    if (this.props.route.params != undefined) {
-      const { editdata } = this.props.route.params;
-      this.setState({ data: editdata });
+    if (route.params !== undefined) {
+      const { editdata } = route.params;
+      setData(editdata);
       if (editdata.length > 0) {
-        this.setState({ ticketNumber: editdata[0].ticket_number });
-        this.setState({
-          arrivalDestinationDate: editdata[0].arrival_date_at_destination,
-        });
-        this.setState({
-          arrivalDestinationAirport: editdata[0].destination_airport,
-        });
-        this.setState({ pnrNumber: editdata[0].pnr_number });
+        setTicketNumber(editdata[0].ticket_number);
+        setArrivalDestinationDate(editdata[0].arrival_date_at_destination);
+        setArrivalDestinationAirport(editdata[0].destination_airport);
+        setPnrNumber(editdata[0].pnr_number);
       }
     }
-  }
 
-  componentWillUnmount() {
-    this.backHandler.remove();
-  }
+    return () => {
+      backHandler.remove();
+    };
+  }, []);
 
-  handleBackButton = () => {
-    //add your code
-    this.props.navigation.goBack();
-    return true; // Return true to prevent default back button behavior
-  };
-  handlePicker = (datetime) => {
-    this.setState({
-      isVisibleTo: false,
-      arrivalDestinationDate: moment(datetime).format(""),
-    });
-  };
-  hidePicker = () => {
-    this.setState({
-      isVisibleTo: false,
-    });
-  };
-  showPicker = () => {
-    this.setState({
-      isVisibleTo: true,
-    });
+  const handleBackButton = () => {
+    // Add your code for handling the back button press
+    return true; // Return `true` to prevent default back button behavior
   };
 
-  move = async () => {
-    const {
-      ticketNumber,
-      arrivalDestinationDate,
-      arrivalDestinationAirport,
-      pnrNumber,
-    } = this.state;
-    if (ticketNumber == "") {
+  const handlePicker = (datetime) => {
+    setArrivalDestinationDate(moment(datetime).format(""));
+    setIsVisibleTo(false);
+  };
+
+  const hidePicker = () => {
+    setIsVisibleTo(false);
+  };
+
+  const showPicker = () => {
+    setIsVisibleTo(true);
+  };
+
+  const move = () => {
+    if (ticketNumber === "") {
       Alert.alert("Empty Field!", "Please enter your ticket number");
-      return;
-    } else if (arrivalDestinationDate == "") {
+    } else if (arrivalDestinationDate === "") {
       Alert.alert(
         "Empty Field!",
         "Please enter your arrival date at destination"
       );
-      return;
-    } else if (arrivalDestinationAirport == "") {
+    } else if (arrivalDestinationAirport === "") {
       Alert.alert("Empty Field!", "Please enter your destination airport");
-      return;
-    } else if (pnrNumber == "") {
+    } else if (pnrNumber === "") {
       Alert.alert("Empty Field!", "Please enter your PNR number");
-      return;
     } else {
-      this.props.navigation.navigate("tripdetail2", {
-        ticketNumber: ticketNumber,
-        arrivalDestinationDate: arrivalDestinationDate,
-        arrivalDestinationAirport: arrivalDestinationAirport,
-        pnrNumber: pnrNumber,
-        editdata: this.state.data,
+      navigation.navigate("tripdetail2", {
+        ticketNumber,
+        arrivalDestinationDate,
+        arrivalDestinationAirport,
+        pnrNumber,
+        editdata: data,
       });
     }
   };
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <View>
-          <Toast ref={(ref) => Toast.setRef(ref)} />
+  return (
+    <View style={styles.container}>
+      <View>
+        <Toast ref={(ref) => Toast.setRef(ref)} />
+      </View>
+
+      <ImageBackground
+        source={require("../../assets/images/icon/bgw.jpg")}
+        style={{ width: "100%", height: Height }}
+        resizeMode="stretch"
+      >
+        <View style={{ flexDirection: "row", marginTop: wp("12%") }}>
+          <TouchableOpacity
+            style={{ width: "30%" }}
+            onPress={() => navigation.goBack()}
+          >
+            <Image
+              style={styles.menuicon}
+              source={require("../../assets/images/icon/left-arrow.png")}
+            />
+          </TouchableOpacity>
+          <View style={{ width: "40%" }}></View>
         </View>
 
-        <ImageBackground
-          source={require("../../assets/images/icon/bgw.jpg")}
-          style={{ width: "100%", height: Height }}
-          resizeMode="stretch"
+        <Text
+          style={{
+            textAlign: "left",
+            marginLeft: 30,
+            color: "white",
+            fontSize: 35,
+            fontWeight: "bold",
+            marginTop: 30,
+          }}
         >
-          <View style={{ flexDirection: "row", marginTop: wp("12%") }}>
-            <TouchableOpacity
-              style={{ width: "30%" }}
-              onPress={() => this.props.navigation.goBack()}
-            >
-              <Image
-                style={styles.menuicon}
-                source={require("../../assets/images/icon/left-arrow.png")}
-              />
-            </TouchableOpacity>
-            <View style={{ width: "40%" }}></View>
-          </View>
-
-          <Text
-            style={{
-              textAlign: "left",
-              marginLeft: 30,
-              color: "white",
-              fontSize: 35,
-              fontWeight: "bold",
-              marginTop: 30,
-            }}
-          >
-            Trip Details
-          </Text>
-
+          Trip Details
+        </Text>
+        <KeyboardAvoidingView
+          behavior="position"
+          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+        >
           <View style={{ marginTop: wp("0%"), padding: 0 }}>
-            <KeyboardAvoidingView>
-              <View
-                style={[
-                  styles.firstInput,
-                  { marginTop: wp(30), alignSelf: "center" },
-                ]}
-              >
+            <View
+              style={[
+                styles.firstInput,
+                { marginTop: wp(30), alignSelf: "center" },
+              ]}
+            >
+              <Pressable onPress={() => console.log("Ticket number")}>
                 <TextInput
                   style={styles.input}
                   label="ENTER YOUR TICKET NUMBER"
@@ -187,10 +164,8 @@ export default class Tripdetail extends React.Component {
                     roundness: 15,
                   }}
                   placeholder={"Ticket number"}
-                  value={this.state.ticketNumber}
-                  onChangeText={(ticketNumber) =>
-                    this.setState({ ticketNumber })
-                  }
+                  value={ticketNumber}
+                  onChangeText={setTicketNumber}
                   right={
                     <TextInput.Icon
                       name={() => (
@@ -204,180 +179,181 @@ export default class Tripdetail extends React.Component {
                     />
                   }
                 />
-              </View>
+              </Pressable>
+            </View>
 
-              <TouchableOpacity
-                onPress={this.showPicker}
-                style={[
-                  styles.firstInput,
-                  { marginTop: 10, alignSelf: "center" },
-                ]}
-              >
-                <TextInput
-                  style={styles.input}
-                  label="ARRIVAL DATE AT DESTINATION"
-                  mode="outlined"
-                  theme={{
-                    colors: {
-                      primary: "#c8c8c8",
-                      outlineColor: "#ffffff",
-                    },
-                    roundness: 15,
-                  }}
-                  placeholder={"ARRIVAL DATE AT DESTINATION"}
-                  value={`${
-                    this.state.arrivalDestinationDate == ""
-                      ? ""
-                      : moment(this.state.arrivalDestinationDate).format(
-                          "MMMM Do YYYY, h:mm:ss A"
-                        )
-                  }`}
-                  onChangeText={(arrivalDestinationDate) =>
-                    this.setState({ arrivalDestinationDate })
-                  }
-                  right={
-                    <TextInput.Icon
-                      name={() => (
-                        <FontAwesome5
-                          name="calendar"
-                          size={20}
-                          style={{ marginTop: 0 }}
-                          color="#D9D9D9"
-                        />
-                      )}
-                    />
-                  }
-                  editable={false}
-                />
-                <DateTimePickerModal
-                  isVisible={this.state.isVisibleTo}
-                  onConfirm={this.handlePicker}
-                  onCancel={this.hidePicker}
-                  mode={"datetime"}
-                  date={
-                    this.state.arrivalDestinationDate
-                      ? new Date(this.state.arrivalDestinationDate)
-                      : new Date()
-                  }
-                  datePickerModeAndroid={"spinner"}
-                />
-              </TouchableOpacity>
-
-              <View
-                style={[
-                  styles.firstInput,
-                  { marginTop: 10, alignSelf: "center" },
-                ]}
-              >
-                <TextInput
-                  style={styles.input}
-                  label="DESTINATION AIRPORT"
-                  mode="outlined"
-                  theme={{
-                    colors: {
-                      primary: "#c8c8c8",
-                    },
-                    roundness: 15,
+            <TouchableOpacity
+              onPress={showPicker}
+              style={[
+                styles.firstInput,
+                { marginTop: 10, alignSelf: "center" },
+              ]}
+            >
+              <TextInput
+                onPress={showPicker}
+                style={styles.input}
+                label="ARRIVAL DATE AT DESTINATION"
+                mode="outlined"
+                theme={{
+                  colors: {
+                    primary: "#c8c8c8",
                     outlineColor: "#ffffff",
-                  }}
-                  placeholder={"DESTINATION AIRPORT"}
-                  value={this.state.arrivalDestinationAirport}
-                  onChangeText={(arrivalDestinationAirport) =>
-                    this.setState({ arrivalDestinationAirport })
-                  }
-                  right={
-                    <TextInput.Icon
-                      name={() => (
-                        <FontAwesome5
-                          name="search"
-                          size={20}
-                          style={{ marginTop: 0 }}
-                          color="#D9D9D9"
-                        />
-                      )}
-                    />
-                  }
-                />
-              </View>
+                  },
+                  roundness: 15,
+                }}
+                placeholder={"ARRIVAL DATE AT DESTINATION"}
+                value={`${
+                  arrivalDestinationDate == ""
+                    ? ""
+                    : moment(arrivalDestinationDate).format(
+                        "MMMM Do YYYY, h:mm:ss A"
+                      )
+                }`}
+                onChangeText={setArrivalDestinationDate}
+                right={
+                  <TextInput.Icon
+                    onPress={showPicker}
+                    name={() => (
+                      <FontAwesome5
+                        name="calendar"
+                        size={20}
+                        style={{ marginTop: 0 }}
+                        color="#D9D9D9"
+                      />
+                    )}
+                  />
+                }
+                editable={false}
+              />
 
-              <View
-                style={[
-                  styles.firstInput,
-                  { marginTop: 10, alignSelf: "center" },
-                ]}
-              >
-                <TextInput
-                  style={styles.input}
-                  label="ENTER YOUR PNR NUMBER"
-                  mode="outlined"
-                  keyboardType="phone-pad"
-                  theme={{
-                    colors: {
-                      primary: "#c8c8c8",
-                      outlineColor: "#ffffff",
-                    },
-                    roundness: 15,
-                  }}
-                  placeholder={"Ticket number"}
-                  value={this.state.pnrNumber}
-                  onChangeText={(pnrNumber) => this.setState({ pnrNumber })}
-                  right={
-                    <TextInput.Icon
-                      name={() => (
-                        <FontAwesome5
-                          name="search"
-                          size={20}
-                          style={{ marginTop: 0 }}
-                          color="#D9D9D9"
-                        />
-                      )}
-                    />
-                  }
-                />
-              </View>
-            </KeyboardAvoidingView>
-          </View>
+              <DateTimePickerModal
+                isVisible={isVisibleTo}
+                onConfirm={handlePicker}
+                onCancel={hidePicker}
+                mode={"datetime"}
+                date={
+                  arrivalDestinationDate
+                    ? new Date(arrivalDestinationDate)
+                    : new Date()
+                }
+                datePickerModeAndroid={"spinner"}
+              />
+            </TouchableOpacity>
 
-          <View
-            style={{
-              flexDirection: "row",
-              position: "absolute",
-              left: 0,
-              bottom: 0,
-            }}
-          >
-            <View style={{ width: "50%" }}>
-              <GradientButton
-                onPress={() => this.props.navigation.navigate("Search")}
-                text={"Cancel"}
-                color1={"transparent"}
-                color2={"transparent"}
-                borderRadius={50}
-                width={"90%"}
-                height={45}
-                borderWidth={2}
-                borderColor={"#44c7f3"}
-                textColor={"#44c7f3"}
+            <View
+              style={[
+                styles.firstInput,
+                { marginTop: 10, alignSelf: "center" },
+              ]}
+            >
+              <TextInput
+                style={styles.input}
+                label="DESTINATION AIRPORT"
+                mode="outlined"
+                theme={{
+                  colors: {
+                    primary: "#c8c8c8",
+                  },
+                  roundness: 15,
+                  outlineColor: "#ffffff",
+                }}
+                placeholder={"DESTINATION AIRPORT"}
+                value={arrivalDestinationAirport}
+                onChangeText={setArrivalDestinationAirport}
+                right={
+                  <TextInput.Icon
+                    name={() => (
+                      <FontAwesome5
+                        name="search"
+                        size={20}
+                        style={{ marginTop: 0 }}
+                        color="#D9D9D9"
+                      />
+                    )}
+                  />
+                }
               />
             </View>
-            <View style={{ width: "50%" }}>
-              <GradientButton
-                onPress={() => this.move()}
-                text={"Next"}
-                color1={"#44c7f3"}
-                color2={"#2a78bc"}
-                borderRadius={50}
-                width={"90%"}
-                height={45}
-                marginTop={10}
+
+            <View
+              style={[
+                styles.firstInput,
+                { marginTop: 10, alignSelf: "center", marginBottom: 10 },
+              ]}
+            >
+              <TextInput
+                style={styles.input}
+                label="ENTER YOUR PNR NUMBER"
+                mode="outlined"
+                keyboardType="phone-pad"
+                theme={{
+                  colors: {
+                    primary: "#c8c8c8",
+                    outlineColor: "#ffffff",
+                  },
+                  roundness: 15,
+                }}
+                placeholder={"Ticket number"}
+                value={pnrNumber}
+                onChangeText={setPnrNumber}
+                right={
+                  <TextInput.Icon
+                    name={() => (
+                      <FontAwesome5
+                        name="search"
+                        size={20}
+                        style={{ marginTop: 0 }}
+                        color="#D9D9D9"
+                      />
+                    )}
+                  />
+                }
               />
             </View>
           </View>
-        </ImageBackground>
-      </View>
-    );
-  }
-}
+        </KeyboardAvoidingView>
+
+        <View
+          style={{
+            flexDirection: "row",
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+          }}
+        >
+          <View style={{ width: "50%" }}>
+            <GradientButton
+              onPress={() => navigation.navigate("Search")}
+              text={"Cancel"}
+              color1={"transparent"}
+              color2={"transparent"}
+              borderRadius={50}
+              width={"90%"}
+              height={45}
+              borderWidth={2}
+              borderColor={"#44c7f3"}
+              textColor={"#44c7f3"}
+            />
+          </View>
+          <View style={{ width: "50%" }}>
+            <GradientButton
+              onPress={move}
+              text={"Next"}
+              color1={"#44c7f3"}
+              color2={"#2a78bc"}
+              borderRadius={50}
+              width={"90%"}
+              height={45}
+              marginTop={10}
+            />
+          </View>
+        </View>
+      </ImageBackground>
+    </View>
+  );
+};
+
+export default Tripdetail;
 
 const styles = StyleSheet.create({
   container: {

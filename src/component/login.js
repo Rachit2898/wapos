@@ -56,7 +56,7 @@ export default function Login(props) {
   };
 
   useEffect(() => {
-    registerForPushNotificationsAsync = async () => {
+    const registerForPushNotificationsAsync = async () => {
       if (Device.isDevice) {
         const { status: existingStatus } =
           await Notifications.getPermissionsAsync();
@@ -67,37 +67,31 @@ export default function Login(props) {
           finalStatus = status;
         }
 
-        if (finalStatus !== "granted") {
-          alert("Notifications permission denied");
-          return;
-        } else {
-          var token = (await Notifications.getDevicePushTokenAsync()).data;
+        var token = (await Notifications.getDevicePushTokenAsync()).data;
 
-          if (!!token) {
-            await pushNotifications(token);
-          }
+        if (!!token) {
+          await pushNotifications(token);
+        }
 
-          const db = firebase.firestore();
+        const db = firebase.firestore();
 
-          if (!!userIds) {
-            const userRef = db.collection("users").doc(userIds);
+        if (!!userIds) {
+          const userRef = db.collection("users").doc(userIds);
 
-            const newData = {
-              sender_id: userIds,
+          const newData = {
+            sender_id: userIds,
+            expoPushToken: token,
+          };
 
-              expoPushToken: token,
-            };
-
-            userRef
-              .set(newData, { merge: true })
-              .then(() => {
-                alert("update sucess");
-                console.log("Document updated or created successfully");
-              })
-              .catch((error) => {
-                console.error("Error updating or creating document:", error);
-              });
-          }
+          userRef
+            .set(newData, { merge: true })
+            .then(() => {
+              alert("Update successful");
+              console.log("Document updated or created successfully");
+            })
+            .catch((error) => {
+              console.error("Error updating or creating document:", error);
+            });
         }
       }
 
@@ -121,7 +115,7 @@ export default function Login(props) {
       };
     };
 
-    registerForPushNotificationsAsync();
+    registerForPushNotificationsAsync(); // Invoke the function
   }, [userIds, accessToken]);
 
   const checkUserDetails = async (user) => {
@@ -278,14 +272,6 @@ export default function Login(props) {
               }}
             >
               {loading == false ? null : renderButton()}
-
-              <GradientButton
-                onPress={() => login()}
-                text={"Continue as a guest"}
-                color1={"#44c7f3"}
-                color2={"#2a78bc"}
-                marginTop={0}
-              />
 
               <GradientButton
                 onPress={() => props.navigation.navigate("signupuser")}

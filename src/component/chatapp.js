@@ -260,7 +260,7 @@ class Chatpage extends React.Component {
 
   onSend(messages = []) {
     const currentDate = new Date();
-    const currentTimeNanos = performance.now() * 1e6;
+    const currentTimeNanos = Date.now() * 1e6;
 
     // Get the current time in seconds using performance.now()
     const currentTimeSeconds = currentDate.getSeconds();
@@ -290,12 +290,7 @@ class Chatpage extends React.Component {
         seconds: currentTimeSeconds,
       },
     };
-    console.log(
-      "sendClicke",
-      this.state.pushToken,
-      messages[0].text,
-      this.state.sellerName
-    );
+
     sendNotification(
       this.state.pushToken,
       messages[0].text,

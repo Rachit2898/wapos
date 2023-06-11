@@ -166,9 +166,11 @@ export default class Tripdetail2 extends React.Component {
           >
             Trip Details
           </Text>
-
-          <View style={{ marginTop: wp("0%"), padding: 0 }}>
-            <KeyboardAvoidingView>
+          <KeyboardAvoidingView
+            behavior="position"
+            keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+          >
+            <View style={{ marginTop: wp("0%"), padding: 0 }}>
               <TouchableOpacity
                 onPress={this.showPicker}
                 style={[
@@ -303,7 +305,7 @@ export default class Tripdetail2 extends React.Component {
               <View
                 style={[
                   styles.firstInput,
-                  { marginTop: 10, alignSelf: "center" },
+                  { marginTop: 10, alignSelf: "center", marginBottom: 30 },
                 ]}
               >
                 <TextInput
@@ -336,8 +338,8 @@ export default class Tripdetail2 extends React.Component {
                   }
                 />
               </View>
-            </KeyboardAvoidingView>
-          </View>
+            </View>
+          </KeyboardAvoidingView>
 
           <View
             style={{

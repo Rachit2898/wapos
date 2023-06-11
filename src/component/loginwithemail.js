@@ -303,9 +303,14 @@ export default class Loginwithemail extends React.Component {
             </TouchableOpacity>
 
             <View
-              style={{ flexDirection: "row", paddingLeft: 30, marginTop: 30 }}
+              style={{
+                flexDirection: "row",
+                paddingLeft: 30,
+                marginTop: 30,
+                alignItems: "center",
+              }}
             >
-              <View style={{ width: "10%", marginTop: -26 }}>
+              <View>
                 <Switch
                   style={styles.switchAlignStyle}
                   value={this.state.driverActiveStatus}
@@ -489,6 +494,5 @@ const styles = StyleSheet.create({
 
   switchAlignStyle: {
     alignContent: "center",
-    marginTop: 15,
   },
 });

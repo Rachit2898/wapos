@@ -122,7 +122,7 @@ export default class Shopnow1 extends React.Component {
             <View style={styles.firstInput}>
               <TextInput
                 style={styles.input}
-                placeholder={"Contry name"}
+                placeholder={"Country name"}
                 value={this.state.countryName}
                 onChangeText={(countryName) => this.setState({ countryName })}
               />

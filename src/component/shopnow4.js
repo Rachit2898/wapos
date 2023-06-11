@@ -49,6 +49,7 @@ export default class Shopnow4 extends React.Component {
   componentDidMount() {
     if (this.props.route.params != undefined) {
       const { editdata } = this.props.route.params;
+      console.log({ editdata });
       if (editdata != null) {
         this.setState({
           data: editdata,
@@ -56,7 +57,7 @@ export default class Shopnow4 extends React.Component {
           itemHeight:
             editdata.item_type.height == null
               ? editdata.item_type.height
-              : editdata.item_type.length.toString(),
+              : editdata.item_type.height.toString(),
           itemWidth:
             editdata.item_type.width == null
               ? editdata.item_type.width
@@ -109,13 +110,22 @@ export default class Shopnow4 extends React.Component {
       Alert.alert("Empty Field!", "Please enter your seller fee");
       return;
     }
+    function formatDecimalValue(value) {
+      const parsedValue = parseFloat(value);
+      if (Number.isNaN(parsedValue)) {
+        return ""; // Return empty string if value is not a valid number
+      }
+
+      const decimalValue = parsedValue.toFixed(2);
+      return decimalValue;
+    }
 
     this.setState({ loader: true });
     postItemType(
       productName,
-      itemHeight,
-      itemWidth,
-      itemLength,
+      formatDecimalValue(itemHeight),
+      formatDecimalValue(itemWidth),
+      formatDecimalValue(itemLength),
       itemWeight,
       itemQuantity
     )

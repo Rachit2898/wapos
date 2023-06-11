@@ -256,27 +256,6 @@ const SideMenuDesign = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      <View>
-        <TouchableOpacity>
-          <View style={{ flexDirection: "row", paddingLeft: 55 }}>
-            <Image
-              style={{ width: 23, height: 23, marginRight: 10, marginTop: 2 }}
-              source={require("../../assets/images/icon/gear.png")}
-            />
-            <Text
-              style={{
-                color: "#44c7f3",
-                fontSize: 18,
-                textAlign: "center",
-                marginBottom: 20,
-              }}
-            >
-              Account settings
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };

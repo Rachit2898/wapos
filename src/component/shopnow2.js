@@ -103,7 +103,7 @@ export default class Shopnow2 extends React.Component {
                 textAlign: "left",
               }}
             >
-              Any praticular shop?
+              Any particular shop?
             </Text>
 
             <View style={{ flexDirection: "row" }}>
@@ -128,32 +128,6 @@ export default class Shopnow2 extends React.Component {
                     color="#e1e1e1"
                   />
                 </View>
-              </View>
-              <View
-                style={{
-                  width: "20%",
-                  justifyContent: "center",
-                  alignItems: "flex-end",
-                  paddingTop: wp(3),
-                }}
-              >
-                <TouchableOpacity
-                  style={{
-                    marginRight: wp(4),
-                    backgroundColor: "#44c7f3",
-                    borderRadius: 100,
-                    height: 33,
-                    width: 33,
-                    justifyContent: "center",
-                  }}
-                >
-                  <FontAwesome5
-                    name="plus"
-                    style={{ marginLeft: 0, alignSelf: "center" }}
-                    size={16}
-                    color="#ffffff"
-                  />
-                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -334,13 +308,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 15,
-    width: wp(70),
+    width: wp(80),
     backgroundColor: "#ffffff",
     borderRadius: 30,
     borderColor: "#e1e1e1",
     borderWidth: 2,
     padding: 5,
     marginLeft: wp(5),
+    paddingRight: 30,
   },
   secondInput: {
     flexDirection: "row",
@@ -351,8 +326,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 25,
   },
   input: {
-    width: "77%",
-    paddingLeft: 10,
+    width: "90%",
     padding: 5,
     marginBottom: 0,
     backgroundColor: "transparent",

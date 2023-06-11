@@ -10,6 +10,7 @@ import {
   TextInput,
   ImageBackground,
   Alert,
+  Modal,
 } from "react-native";
 const { width: WIDTH } = Dimensions.get("window");
 const { height: Height } = Dimensions.get("screen");
@@ -20,8 +21,10 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import Toast from "react-native-toast-message";
+import CustomPicker from "./picker";
 
 import { Picker } from "@react-native-picker/picker";
+
 import GradientButton from "../utils/GradientButton";
 import Header from "../utils/Header";
 import { Base_URL_IMAGE } from "../api/constants";
@@ -38,6 +41,9 @@ export default class Shopnow3 extends React.Component {
       itemCost: "",
       itemQuantity: "",
       data: null,
+
+      showModal: false,
+      selectedItem: null,
     };
   }
   componentDidMount() {
@@ -53,6 +59,17 @@ export default class Shopnow3 extends React.Component {
       }
     }
   }
+  openModal = () => {
+    this.setState({ showModal: true });
+  };
+
+  closeModal = () => {
+    this.setState({ showModal: false });
+  };
+
+  selectItem = (item) => {
+    this.setState({ selectedItem: item, showModal: false });
+  };
   move() {
     const {
       productName,
@@ -91,6 +108,8 @@ export default class Shopnow3 extends React.Component {
   }
 
   render() {
+    const { items } = this.props;
+    const { selectedItem, showModal } = this.state;
     return (
       <View style={styles.container}>
         <ScrollView>
@@ -132,37 +151,16 @@ export default class Shopnow3 extends React.Component {
                   Product price
                 </Text>
               </View>
-              <View
-                style={{
-                  width: "50%",
-                  alignItems: "flex-end",
-                  paddingRight: 10,
-                  justifyContent: "center",
-                  backgroundColor: "##fffff",
-                  borderColor: "#ffffff",
-                  borderWidth: 1,
-                  borderRadius: 100,
-                }}
-              >
-                <Picker
-                  mode="dropdown"
-                  style={{
-                    height: 30,
-                    color: "#44c7f3",
-                    width: wp(30),
-                    fontWeight: "bold",
-                    fontSize: 20,
-                    marginTop: 4,
-                  }}
-                  selectedValue={this.state.itemCostCurrency}
-                  onValueChange={(itemValue) =>
-                    this.setState({ itemCostCurrency: itemValue })
-                  }
-                >
-                  <Picker.Item label="USD" value="USD" />
-                  <Picker.Item label="EUR" value="EUR" />
-                </Picker>
-              </View>
+              <CustomPicker
+                items={[
+                  { label: "USD", value: "USD" },
+                  { label: "EUR", value: "EUR" },
+                ]}
+                selectedValue={this.state.itemCostCurrency}
+                onValueChange={(itemValue) =>
+                  this.setState({ itemCostCurrency: itemValue })
+                }
+              />
             </View>
 
             <View style={styles.firstInput}>
