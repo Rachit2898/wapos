@@ -10,6 +10,7 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Alert,
+  Platform,
 } from "react-native";
 const { width: WIDTH } = Dimensions.get("window");
 const { height: Height } = Dimensions.get("window");
@@ -135,248 +136,250 @@ export default class Tripdetail2 extends React.Component {
         <View>
           <Toast ref={(ref) => Toast.setRef(ref)} />
         </View>
-
-        <ImageBackground
-          source={require("../../assets/images/icon/bgw.jpg")}
-          style={{ width: "100%", height: Height }}
-          resizeMode="stretch"
-        >
-          <View style={{ flexDirection: "row", marginTop: wp("12%") }}>
-            <TouchableOpacity
-              style={{ width: "30%" }}
-              onPress={() => this.props.navigation.goBack()}
+        <KeyboardAvoidingView behavior="padding">
+          <ScrollView>
+            <ImageBackground
+              source={require("../../assets/images/icon/bgw.jpg")}
+              style={{
+                width: "100%",
+                height: Platform.OS == "android" ? "100%" : Height,
+              }}
+              resizeMode="stretch"
             >
-              <Image
-                style={styles.menuicon}
-                source={require("../../assets/images/icon/left-arrow.png")}
-              />
-            </TouchableOpacity>
-            <View style={{ width: "40%" }}></View>
-          </View>
+              <View style={{ flexDirection: "row", marginTop: wp("12%") }}>
+                <TouchableOpacity
+                  style={{ width: "30%" }}
+                  onPress={() => this.props.navigation.goBack()}
+                >
+                  <Image
+                    style={styles.menuicon}
+                    source={require("../../assets/images/icon/left-arrow.png")}
+                  />
+                </TouchableOpacity>
+                <View style={{ width: "40%" }}></View>
+              </View>
 
-          <Text
-            style={{
-              textAlign: "left",
-              marginLeft: 30,
-              color: "white",
-              fontSize: 35,
-              fontWeight: "bold",
-              marginTop: 30,
-            }}
-          >
-            Trip Details
-          </Text>
-          <KeyboardAvoidingView
-            behavior="position"
-            keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
-          >
-            <View style={{ marginTop: wp("0%"), padding: 0 }}>
-              <TouchableOpacity
-                onPress={this.showPicker}
-                style={[
-                  styles.firstInput,
-                  { marginTop: wp(30), alignSelf: "center" },
-                ]}
+              <Text
+                style={{
+                  textAlign: "left",
+                  marginLeft: 30,
+                  color: "white",
+                  fontSize: 35,
+                  fontWeight: "bold",
+                  marginTop: 30,
+                }}
               >
-                <TextInput
-                  style={styles.input}
-                  label="ARRIVAL DATE AT ORIGIN"
-                  mode="outlined"
-                  theme={{
-                    colors: {
-                      primary: "#c8c8c8",
+                Trip Details
+              </Text>
+
+              <View style={{ marginTop: wp("0%"), padding: 0 }}>
+                <TouchableOpacity
+                  onPress={this.showPicker}
+                  style={[
+                    styles.firstInput,
+                    { marginTop: wp(30), alignSelf: "center" },
+                  ]}
+                >
+                  <TextInput
+                    style={styles.input}
+                    label="ARRIVAL DATE AT ORIGIN"
+                    mode="outlined"
+                    theme={{
+                      colors: {
+                        primary: "#c8c8c8",
+                        outlineColor: "#ffffff",
+                      },
+                      roundness: 15,
+                    }}
+                    placeholder={"ARRIVAL DATE AT DESTINATION"}
+                    value={`${
+                      this.state.arrivalDateAtOrigin == ""
+                        ? ""
+                        : moment(this.state.arrivalDateAtOrigin).format(
+                            "MMMM Do YYYY, h:mm:ss A"
+                          )
+                    }`}
+                    onChangeText={(arrivalDateAtOrigin) =>
+                      this.setState({ arrivalDateAtOrigin })
+                    }
+                    right={
+                      <TextInput.Icon
+                        onPress={this.showPicker}
+                        name={() => (
+                          <FontAwesome5
+                            name="calendar"
+                            size={20}
+                            style={{ marginTop: 0 }}
+                            color="#D9D9D9"
+                          />
+                        )}
+                      />
+                    }
+                    editable={false}
+                  />
+                  <DateTimePickerModal
+                    isVisible={this.state.isVisibleTo}
+                    onConfirm={this.handlePicker}
+                    onCancel={this.hidePicker}
+                    mode={"datetime"}
+                    date={
+                      this.state.arrivalDateAtOrigin
+                        ? new Date(this.state.arrivalDateAtOrigin)
+                        : new Date()
+                    }
+                    datePickerModeAndroid={"spinner"}
+                  />
+                </TouchableOpacity>
+
+                <View
+                  style={[
+                    styles.firstInput,
+                    { marginTop: 10, alignSelf: "center" },
+                  ]}
+                >
+                  <TextInput
+                    style={styles.input}
+                    label="ORIGIN AIRPORT"
+                    mode="outlined"
+                    theme={{
+                      colors: {
+                        primary: "#c8c8c8",
+                      },
+                      roundness: 15,
                       outlineColor: "#ffffff",
-                    },
-                    roundness: 15,
-                  }}
-                  placeholder={"ARRIVAL DATE AT DESTINATION"}
-                  value={`${
-                    this.state.arrivalDateAtOrigin == ""
-                      ? ""
-                      : moment(this.state.arrivalDateAtOrigin).format(
-                          "MMMM Do YYYY, h:mm:ss A"
-                        )
-                  }`}
-                  onChangeText={(arrivalDateAtOrigin) =>
-                    this.setState({ arrivalDateAtOrigin })
-                  }
-                  right={
-                    <TextInput.Icon
-                      name={() => (
-                        <FontAwesome5
-                          name="calendar"
-                          size={20}
-                          style={{ marginTop: 0 }}
-                          color="#D9D9D9"
-                        />
-                      )}
-                    />
-                  }
-                  editable={false}
-                />
-                <DateTimePickerModal
-                  isVisible={this.state.isVisibleTo}
-                  onConfirm={this.handlePicker}
-                  onCancel={this.hidePicker}
-                  mode={"datetime"}
-                  date={
-                    this.state.arrivalDateAtOrigin
-                      ? new Date(this.state.arrivalDateAtOrigin)
-                      : new Date()
-                  }
-                  datePickerModeAndroid={"spinner"}
-                />
-              </TouchableOpacity>
+                    }}
+                    placeholder={"ORIGIN AIRPORT"}
+                    value={this.state.originAirport}
+                    onChangeText={(originAirport) =>
+                      this.setState({ originAirport })
+                    }
+                    right={
+                      <TextInput.Icon
+                        name={() => (
+                          <FontAwesome5
+                            name="search"
+                            size={20}
+                            style={{ marginTop: 0 }}
+                            color="#D9D9D9"
+                          />
+                        )}
+                      />
+                    }
+                  />
+                </View>
 
-              <View
-                style={[
-                  styles.firstInput,
-                  { marginTop: 10, alignSelf: "center" },
-                ]}
-              >
-                <TextInput
-                  style={styles.input}
-                  label="ORIGIN AIRPORT"
-                  mode="outlined"
-                  theme={{
-                    colors: {
-                      primary: "#c8c8c8",
-                    },
-                    roundness: 15,
-                    outlineColor: "#ffffff",
-                  }}
-                  placeholder={"ORIGIN AIRPORT"}
-                  value={this.state.originAirport}
-                  onChangeText={(originAirport) =>
-                    this.setState({ originAirport })
-                  }
-                  right={
-                    <TextInput.Icon
-                      name={() => (
-                        <FontAwesome5
-                          name="search"
-                          size={20}
-                          style={{ marginTop: 0 }}
-                          color="#D9D9D9"
-                        />
-                      )}
-                    />
-                  }
-                />
+                <View
+                  style={[
+                    styles.firstInput,
+                    { marginTop: 10, alignSelf: "center" },
+                  ]}
+                >
+                  <TextInput
+                    style={styles.input}
+                    label="ORIGIN COUNTRY"
+                    mode="outlined"
+                    theme={{
+                      colors: {
+                        primary: "#c8c8c8",
+                      },
+                      roundness: 15,
+                      outlineColor: "#ffffff",
+                    }}
+                    placeholder={"ORIGIN COUNTRY"}
+                    value={this.state.originCountry}
+                    onChangeText={(originCountry) =>
+                      this.setState({ originCountry })
+                    }
+                    right={
+                      <TextInput.Icon
+                        name={() => (
+                          <FontAwesome5
+                            name="search"
+                            size={20}
+                            style={{ marginTop: 0 }}
+                            color="#D9D9D9"
+                          />
+                        )}
+                      />
+                    }
+                  />
+                </View>
+
+                <View
+                  style={[
+                    styles.firstInput,
+                    { marginTop: 10, alignSelf: "center", marginBottom: 30 },
+                  ]}
+                >
+                  <TextInput
+                    style={styles.input}
+                    label="DESTINATION COUNTRY"
+                    mode="outlined"
+                    theme={{
+                      colors: {
+                        primary: "#c8c8c8",
+                      },
+                      roundness: 15,
+                      outlineColor: "#ffffff",
+                    }}
+                    placeholder={"DESTINATION COUNTRY"}
+                    value={this.state.destinationCountry}
+                    onChangeText={(destinationCountry) =>
+                      this.setState({ destinationCountry })
+                    }
+                    right={
+                      <TextInput.Icon
+                        name={() => (
+                          <FontAwesome5
+                            name="search"
+                            size={20}
+                            style={{ marginTop: 0 }}
+                            color="#D9D9D9"
+                          />
+                        )}
+                      />
+                    }
+                  />
+                </View>
               </View>
-
-              <View
-                style={[
-                  styles.firstInput,
-                  { marginTop: 10, alignSelf: "center" },
-                ]}
-              >
-                <TextInput
-                  style={styles.input}
-                  label="ORIGIN COUNTRY"
-                  mode="outlined"
-                  theme={{
-                    colors: {
-                      primary: "#c8c8c8",
-                    },
-                    roundness: 15,
-                    outlineColor: "#ffffff",
-                  }}
-                  placeholder={"ORIGIN COUNTRY"}
-                  value={this.state.originCountry}
-                  onChangeText={(originCountry) =>
-                    this.setState({ originCountry })
-                  }
-                  right={
-                    <TextInput.Icon
-                      name={() => (
-                        <FontAwesome5
-                          name="search"
-                          size={20}
-                          style={{ marginTop: 0 }}
-                          color="#D9D9D9"
-                        />
-                      )}
-                    />
-                  }
-                />
-              </View>
-
-              <View
-                style={[
-                  styles.firstInput,
-                  { marginTop: 10, alignSelf: "center", marginBottom: 30 },
-                ]}
-              >
-                <TextInput
-                  style={styles.input}
-                  label="DESTINATION COUNTRY"
-                  mode="outlined"
-                  theme={{
-                    colors: {
-                      primary: "#c8c8c8",
-                    },
-                    roundness: 15,
-                    outlineColor: "#ffffff",
-                  }}
-                  placeholder={"DESTINATION COUNTRY"}
-                  value={this.state.destinationCountry}
-                  onChangeText={(destinationCountry) =>
-                    this.setState({ destinationCountry })
-                  }
-                  right={
-                    <TextInput.Icon
-                      name={() => (
-                        <FontAwesome5
-                          name="search"
-                          size={20}
-                          style={{ marginTop: 0 }}
-                          color="#D9D9D9"
-                        />
-                      )}
-                    />
-                  }
-                />
-              </View>
-            </View>
-          </KeyboardAvoidingView>
-
-          <View
-            style={{
-              flexDirection: "row",
-              position: "absolute",
-              left: 0,
-              bottom: 0,
-            }}
-          >
-            <View style={{ width: "50%" }}>
-              <GradientButton
-                onPress={() => this.props.navigation.navigate("Search")}
-                text={"Cancel"}
-                color1={"transparent"}
-                color2={"transparent"}
-                borderRadius={50}
-                width={"90%"}
-                height={45}
-                borderWidth={2}
-                borderColor={"#44c7f3"}
-                textColor={"#44c7f3"}
-              />
-            </View>
-            <View style={{ width: "50%" }}>
-              <GradientButton
-                onPress={() => this.move()}
-                text={"Next"}
-                color1={"#44c7f3"}
-                color2={"#2a78bc"}
-                borderRadius={50}
-                width={"90%"}
-                height={45}
-                marginTop={10}
-              />
-            </View>
+            </ImageBackground>
+          </ScrollView>
+        </KeyboardAvoidingView>
+        <View
+          style={{
+            flexDirection: "row",
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+          }}
+        >
+          <View style={{ width: "50%" }}>
+            <GradientButton
+              onPress={() => this.props.navigation.navigate("Search")}
+              text={"Cancel"}
+              color1={"transparent"}
+              color2={"transparent"}
+              borderRadius={50}
+              width={"90%"}
+              height={45}
+              borderWidth={2}
+              borderColor={"#44c7f3"}
+              textColor={"#44c7f3"}
+            />
           </View>
-        </ImageBackground>
+          <View style={{ width: "50%" }}>
+            <GradientButton
+              onPress={() => this.move()}
+              text={"Next"}
+              color1={"#44c7f3"}
+              color2={"#2a78bc"}
+              borderRadius={50}
+              width={"90%"}
+              height={45}
+              marginTop={10}
+            />
+          </View>
+        </View>
       </View>
     );
   }

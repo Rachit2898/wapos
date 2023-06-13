@@ -109,53 +109,93 @@ const Tripdetail = ({ navigation, route }) => {
         <Toast ref={(ref) => Toast.setRef(ref)} />
       </View>
 
-      <ImageBackground
-        source={require("../../assets/images/icon/bgw.jpg")}
-        style={{ width: "100%", height: Height }}
-        resizeMode="stretch"
-      >
-        <View style={{ flexDirection: "row", marginTop: wp("12%") }}>
-          <TouchableOpacity
-            style={{ width: "30%" }}
-            onPress={() => navigation.goBack()}
+      <KeyboardAvoidingView behavior="padding">
+        <ScrollView>
+          <ImageBackground
+            source={require("../../assets/images/icon/bgw.jpg")}
+            style={{
+              width: "100%",
+              height: Platform.OS == "android" ? "100%" : Height,
+            }}
+            resizeMode="stretch"
           >
-            <Image
-              style={styles.menuicon}
-              source={require("../../assets/images/icon/left-arrow.png")}
-            />
-          </TouchableOpacity>
-          <View style={{ width: "40%" }}></View>
-        </View>
+            <View style={{ flexDirection: "row", marginTop: wp("12%") }}>
+              <TouchableOpacity
+                style={{ width: "30%" }}
+                onPress={() => navigation.goBack()}
+              >
+                <Image
+                  style={styles.menuicon}
+                  source={require("../../assets/images/icon/left-arrow.png")}
+                />
+              </TouchableOpacity>
+              <View style={{ width: "40%" }}></View>
+            </View>
 
-        <Text
-          style={{
-            textAlign: "left",
-            marginLeft: 30,
-            color: "white",
-            fontSize: 35,
-            fontWeight: "bold",
-            marginTop: 30,
-          }}
-        >
-          Trip Details
-        </Text>
-        <KeyboardAvoidingView
-          behavior="position"
-          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
-        >
-          <View style={{ marginTop: wp("0%"), padding: 0 }}>
-            <View
-              style={[
-                styles.firstInput,
-                { marginTop: wp(30), alignSelf: "center" },
-              ]}
+            <Text
+              style={{
+                textAlign: "left",
+                marginLeft: 30,
+                color: "white",
+                fontSize: 35,
+                fontWeight: "bold",
+                marginTop: 30,
+              }}
             >
-              <Pressable onPress={() => console.log("Ticket number")}>
+              Trip Details
+            </Text>
+
+            <View style={{ marginTop: wp("0%"), padding: 0 }}>
+              <View
+                style={[
+                  styles.firstInput,
+                  { marginTop: wp(30), alignSelf: "center" },
+                ]}
+              >
+                <Pressable onPress={() => console.log("Ticket number")}>
+                  <TextInput
+                    style={styles.input}
+                    label="ENTER YOUR TICKET NUMBER"
+                    mode="outlined"
+                    keyboardType="phone-pad"
+                    theme={{
+                      colors: {
+                        primary: "#c8c8c8",
+                        outlineColor: "#ffffff",
+                      },
+                      roundness: 15,
+                    }}
+                    placeholder={"Ticket number"}
+                    value={ticketNumber}
+                    onChangeText={setTicketNumber}
+                    right={
+                      <TextInput.Icon
+                        name={() => (
+                          <FontAwesome5
+                            name="search"
+                            size={20}
+                            style={{ marginTop: 0 }}
+                            color="#D9D9D9"
+                          />
+                        )}
+                      />
+                    }
+                  />
+                </Pressable>
+              </View>
+
+              <TouchableOpacity
+                onPress={showPicker}
+                style={[
+                  styles.firstInput,
+                  { marginTop: 10, alignSelf: "center" },
+                ]}
+              >
                 <TextInput
+                  onPress={showPicker}
                   style={styles.input}
-                  label="ENTER YOUR TICKET NUMBER"
+                  label="ARRIVAL DATE AT DESTINATION"
                   mode="outlined"
-                  keyboardType="phone-pad"
                   theme={{
                     colors: {
                       primary: "#c8c8c8",
@@ -163,9 +203,65 @@ const Tripdetail = ({ navigation, route }) => {
                     },
                     roundness: 15,
                   }}
-                  placeholder={"Ticket number"}
-                  value={ticketNumber}
-                  onChangeText={setTicketNumber}
+                  placeholder={"ARRIVAL DATE AT DESTINATION"}
+                  value={`${
+                    arrivalDestinationDate == ""
+                      ? ""
+                      : moment(arrivalDestinationDate).format(
+                          "MMMM Do YYYY, h:mm:ss A"
+                        )
+                  }`}
+                  onChangeText={setArrivalDestinationDate}
+                  right={
+                    <TextInput.Icon
+                      onPress={showPicker}
+                      name={() => (
+                        <FontAwesome5
+                          name="calendar"
+                          size={20}
+                          style={{ marginTop: 0 }}
+                          color="#D9D9D9"
+                        />
+                      )}
+                    />
+                  }
+                  editable={false}
+                />
+
+                <DateTimePickerModal
+                  isVisible={isVisibleTo}
+                  onConfirm={handlePicker}
+                  onCancel={hidePicker}
+                  mode={"datetime"}
+                  date={
+                    arrivalDestinationDate
+                      ? new Date(arrivalDestinationDate)
+                      : new Date()
+                  }
+                  datePickerModeAndroid={"spinner"}
+                />
+              </TouchableOpacity>
+
+              <View
+                style={[
+                  styles.firstInput,
+                  { marginTop: 10, alignSelf: "center" },
+                ]}
+              >
+                <TextInput
+                  style={styles.input}
+                  label="DESTINATION AIRPORT"
+                  mode="outlined"
+                  theme={{
+                    colors: {
+                      primary: "#c8c8c8",
+                    },
+                    roundness: 15,
+                    outlineColor: "#ffffff",
+                  }}
+                  placeholder={"DESTINATION AIRPORT"}
+                  value={arrivalDestinationAirport}
+                  onChangeText={setArrivalDestinationAirport}
                   right={
                     <TextInput.Icon
                       name={() => (
@@ -179,176 +275,83 @@ const Tripdetail = ({ navigation, route }) => {
                     />
                   }
                 />
-              </Pressable>
+              </View>
+
+              <View
+                style={[
+                  styles.firstInput,
+                  { marginTop: 10, alignSelf: "center", marginBottom: 10 },
+                ]}
+              >
+                <TextInput
+                  style={styles.input}
+                  label="ENTER YOUR PNR NUMBER"
+                  mode="outlined"
+                  keyboardType="phone-pad"
+                  theme={{
+                    colors: {
+                      primary: "#c8c8c8",
+                      outlineColor: "#ffffff",
+                    },
+                    roundness: 15,
+                  }}
+                  placeholder={"Ticket number"}
+                  value={pnrNumber}
+                  onChangeText={setPnrNumber}
+                  right={
+                    <TextInput.Icon
+                      name={() => (
+                        <FontAwesome5
+                          name="search"
+                          size={20}
+                          style={{ marginTop: 0 }}
+                          color="#D9D9D9"
+                        />
+                      )}
+                    />
+                  }
+                />
+              </View>
             </View>
+          </ImageBackground>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-            <TouchableOpacity
-              onPress={showPicker}
-              style={[
-                styles.firstInput,
-                { marginTop: 10, alignSelf: "center" },
-              ]}
-            >
-              <TextInput
-                onPress={showPicker}
-                style={styles.input}
-                label="ARRIVAL DATE AT DESTINATION"
-                mode="outlined"
-                theme={{
-                  colors: {
-                    primary: "#c8c8c8",
-                    outlineColor: "#ffffff",
-                  },
-                  roundness: 15,
-                }}
-                placeholder={"ARRIVAL DATE AT DESTINATION"}
-                value={`${
-                  arrivalDestinationDate == ""
-                    ? ""
-                    : moment(arrivalDestinationDate).format(
-                        "MMMM Do YYYY, h:mm:ss A"
-                      )
-                }`}
-                onChangeText={setArrivalDestinationDate}
-                right={
-                  <TextInput.Icon
-                    onPress={showPicker}
-                    name={() => (
-                      <FontAwesome5
-                        name="calendar"
-                        size={20}
-                        style={{ marginTop: 0 }}
-                        color="#D9D9D9"
-                      />
-                    )}
-                  />
-                }
-                editable={false}
-              />
-
-              <DateTimePickerModal
-                isVisible={isVisibleTo}
-                onConfirm={handlePicker}
-                onCancel={hidePicker}
-                mode={"datetime"}
-                date={
-                  arrivalDestinationDate
-                    ? new Date(arrivalDestinationDate)
-                    : new Date()
-                }
-                datePickerModeAndroid={"spinner"}
-              />
-            </TouchableOpacity>
-
-            <View
-              style={[
-                styles.firstInput,
-                { marginTop: 10, alignSelf: "center" },
-              ]}
-            >
-              <TextInput
-                style={styles.input}
-                label="DESTINATION AIRPORT"
-                mode="outlined"
-                theme={{
-                  colors: {
-                    primary: "#c8c8c8",
-                  },
-                  roundness: 15,
-                  outlineColor: "#ffffff",
-                }}
-                placeholder={"DESTINATION AIRPORT"}
-                value={arrivalDestinationAirport}
-                onChangeText={setArrivalDestinationAirport}
-                right={
-                  <TextInput.Icon
-                    name={() => (
-                      <FontAwesome5
-                        name="search"
-                        size={20}
-                        style={{ marginTop: 0 }}
-                        color="#D9D9D9"
-                      />
-                    )}
-                  />
-                }
-              />
-            </View>
-
-            <View
-              style={[
-                styles.firstInput,
-                { marginTop: 10, alignSelf: "center", marginBottom: 10 },
-              ]}
-            >
-              <TextInput
-                style={styles.input}
-                label="ENTER YOUR PNR NUMBER"
-                mode="outlined"
-                keyboardType="phone-pad"
-                theme={{
-                  colors: {
-                    primary: "#c8c8c8",
-                    outlineColor: "#ffffff",
-                  },
-                  roundness: 15,
-                }}
-                placeholder={"Ticket number"}
-                value={pnrNumber}
-                onChangeText={setPnrNumber}
-                right={
-                  <TextInput.Icon
-                    name={() => (
-                      <FontAwesome5
-                        name="search"
-                        size={20}
-                        style={{ marginTop: 0 }}
-                        color="#D9D9D9"
-                      />
-                    )}
-                  />
-                }
-              />
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-
-        <View
-          style={{
-            flexDirection: "row",
-            position: "absolute",
-            left: 0,
-            bottom: 0,
-          }}
-        >
-          <View style={{ width: "50%" }}>
-            <GradientButton
-              onPress={() => navigation.navigate("Search")}
-              text={"Cancel"}
-              color1={"transparent"}
-              color2={"transparent"}
-              borderRadius={50}
-              width={"90%"}
-              height={45}
-              borderWidth={2}
-              borderColor={"#44c7f3"}
-              textColor={"#44c7f3"}
-            />
-          </View>
-          <View style={{ width: "50%" }}>
-            <GradientButton
-              onPress={move}
-              text={"Next"}
-              color1={"#44c7f3"}
-              color2={"#2a78bc"}
-              borderRadius={50}
-              width={"90%"}
-              height={45}
-              marginTop={10}
-            />
-          </View>
+      <View
+        style={{
+          flexDirection: "row",
+          position: "absolute",
+          left: 0,
+          bottom: 5,
+        }}
+      >
+        <View style={{ width: "50%" }}>
+          <GradientButton
+            onPress={() => navigation.navigate("Search")}
+            text={"Cancel"}
+            color1={"transparent"}
+            color2={"transparent"}
+            borderRadius={50}
+            width={"90%"}
+            height={45}
+            borderWidth={2}
+            borderColor={"#44c7f3"}
+            textColor={"#44c7f3"}
+          />
         </View>
-      </ImageBackground>
+        <View style={{ width: "50%" }}>
+          <GradientButton
+            onPress={move}
+            text={"Next"}
+            color1={"#44c7f3"}
+            color2={"#2a78bc"}
+            borderRadius={50}
+            width={"90%"}
+            height={45}
+            marginTop={10}
+          />
+        </View>
+      </View>
     </View>
   );
 };

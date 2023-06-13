@@ -47,6 +47,7 @@ export default class Shopnow4 extends React.Component {
     };
   }
   componentDidMount() {
+    console.log(this.state.itemCost);
     if (this.props.route.params != undefined) {
       const { editdata } = this.props.route.params;
       console.log({ editdata });

@@ -91,7 +91,7 @@ export default class Shopnow3 extends React.Component {
       Alert.alert("Empty Field!", "Please enter your item quanatity");
       return;
     } else {
-      const ITEM_PRICE = parseInt(itemCost) * parseInt(itemQuantity);
+      const ITEM_PRICE = parseInt(itemCost);
       console.log(productName, "nsbcguvcjnxsiuchdeicj");
       this.props.navigation.navigate("shopnow4", {
         PRODUCT_NAME: productName,

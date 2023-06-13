@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ImageBackground,
+  Alert,
 } from "react-native";
 const { width: WIDTH } = Dimensions.get("window");
 import AsyncStorage from "@react-native-async-storage/async-storage";

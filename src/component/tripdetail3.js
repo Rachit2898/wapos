@@ -83,7 +83,24 @@ export default class Tripdetail3 extends React.Component {
       Alert.alert("Empty Field!", "Please enter your item quantity");
       return;
     } else {
-      postItemType(name, height, width, length, weight, quantity)
+      function formatDecimalValue(value) {
+        const parsedValue = parseFloat(value);
+        if (Number.isNaN(parsedValue)) {
+          return ""; // Return empty string if value is not a valid number
+        }
+
+        const decimalValue = parsedValue.toFixed(2);
+        return decimalValue;
+      }
+
+      postItemType(
+        name,
+        formatDecimalValue(height),
+        formatDecimalValue(width),
+        formatDecimalValue(length),
+        weight,
+        quantity
+      )
         .then((response) => response.json())
         .then((responseJson) => {
           if (responseJson.message == "Post data successfully.") {
@@ -113,7 +130,7 @@ export default class Tripdetail3 extends React.Component {
       destinationCountry,
     } = this.props.route.params;
     const { index, fragilePackage } = this.state;
-    console.log(arrivalDateAtOrigin, "step3");
+
     if (index == 0) {
       Alert.alert("Empty Field!", "Please select your item type");
       return;
@@ -208,6 +225,7 @@ export default class Tripdetail3 extends React.Component {
                       placeholder={"HEIGHT"}
                       value={this.state.height}
                       onChangeText={(height) => this.setState({ height })}
+                      keyboardType={"decimal-pad"}
                     />
                   </View>
                 </View>
@@ -232,6 +250,7 @@ export default class Tripdetail3 extends React.Component {
                       placeholder={"WIDTH"}
                       value={this.state.width}
                       onChangeText={(width) => this.setState({ width })}
+                      keyboardType={"decimal-pad"}
                     />
                   </View>
                 </View>
@@ -259,7 +278,7 @@ export default class Tripdetail3 extends React.Component {
                       placeholder={"LENGTH"}
                       value={this.state.length}
                       onChangeText={(length) => this.setState({ length })}
-                      keyboardType={"phone-pad"}
+                      keyboardType={"decimal-pad"}
                     />
                   </View>
                 </View>
@@ -284,7 +303,7 @@ export default class Tripdetail3 extends React.Component {
                       placeholder={"WEIGHT"}
                       value={this.state.weight}
                       onChangeText={(weight) => this.setState({ weight })}
-                      keyboardType={"phone-pad"}
+                      keyboardType={"decimal-pad"}
                     />
                   </View>
                 </View>
@@ -322,19 +341,20 @@ export default class Tripdetail3 extends React.Component {
                       )}
                     />
                   }
-                  keyboardType={"phone-pad"}
+                  keyboardType={"decimal-pad"}
                 />
               </View>
 
               <View
                 style={{
                   flexDirection: "row",
-                  paddingLeft: 0,
                   marginTop: 30,
                   alignSelf: "center",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                <View style={{ width: "10%", marginTop: -26 }}>
+                <View>
                   <Switch
                     style={styles.switchAlignStyle}
                     value={this.state.fragilePackage}
@@ -347,7 +367,14 @@ export default class Tripdetail3 extends React.Component {
                     }}
                   />
                 </View>
-                <Text style={{ fontSize: 16, marginLeft: 0, color: "#747474" }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    marginLeft: 10,
+                    color: "#747474",
+                    textAlign: "center",
+                  }}
+                >
                   Willing to accept Fragile packages?
                 </Text>
               </View>
@@ -492,9 +519,7 @@ const styles = StyleSheet.create({
 
   switchAlignStyle: {
     alignContent: "center",
-    marginTop: 15,
   },
-
   checkboxContainer: {
     flexDirection: "row",
     marginBottom: 20,
