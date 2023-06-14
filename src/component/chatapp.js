@@ -30,7 +30,11 @@ import { TextInput } from "react-native-paper";
 
 import RangeSlider from "react-native-range-slider-expo";
 import * as Notifications from "expo-notifications";
-import { UpdateChatHeader, sendNotification } from "../api/helper";
+import {
+  UpdateChatHeader,
+  sendNotification,
+  sendIosNotification,
+} from "../api/helper";
 import { StackActions } from "react-navigation";
 // Notifications.se({});
 Notifications.setNotificationHandler({
@@ -291,11 +295,26 @@ class Chatpage extends React.Component {
       },
     };
 
-    sendNotification(
-      this.state.pushToken,
-      messages[0].text,
-      this.state.sellerName
-    );
+    function containsSubstring(string, substring) {
+      return string.includes(substring);
+    }
+
+    if (
+      this.state.pushToken.length > 100 &&
+      containsSubstring(this.state.pushToken, ":")
+    ) {
+      sendNotification(
+        this.state.pushToken,
+        messages[0].text,
+        this.state.sellerName
+      );
+    } else {
+      sendIosNotification(
+        this.state.pushToken,
+        messages[0].text,
+        this.state.sellerName
+      );
+    }
     messagesCollectionRef
       .add(newMessageData)
       .then((docRef) => {

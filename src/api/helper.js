@@ -253,8 +253,6 @@ export const postAD = async (
 export const pushNotifications = async (push_notification_id) => {
   const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
 
-  console.log({ TOKEN });
-
   try {
     const response = await fetch(
       `http://103.204.131.97:8767/api/v1/update_push_notification/`,
@@ -267,7 +265,6 @@ export const pushNotifications = async (push_notification_id) => {
         body: JSON.stringify({ push_notification_id: push_notification_id }),
       }
     );
-    console.log("hellllloooooo", response, response.status);
 
     return response;
   } catch (error) {
@@ -350,8 +347,7 @@ export const getFlightDetails = async () => {
 };
 
 export const sendNotification = async (pushToken, text, heading) => {
-  console.log("Send notification", pushToken, text, heading);
-  const response = await fetch("https://fcm.googleapis.com/fcm/send", {
+  await fetch("https://fcm.googleapis.com/fcm/send", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -367,7 +363,40 @@ export const sendNotification = async (pushToken, text, heading) => {
       },
     }),
   });
-  console.log("nbsdhjvfhjebfhjewvfhvcghdvchdsv", response);
+};
+
+export const sendIosNotification = async (pushToken, text, heading) => {
+  const TOKEN = await AsyncStorage.getItem("currentUserFirebaseToken");
+  const formData = new FormData();
+  formData.append("device_token", pushToken);
+  formData.append("title", heading);
+  formData.append("body", text);
+
+  const res = await fetch(
+    "http://103.204.131.97:8767/api/v1/send_apple_notification/",
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-type": "multipart/form-data",
+        Authorization: `JWT ${TOKEN}`,
+      },
+      body: formData,
+    }
+  )
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error("Request failed.");
+      }
+    })
+    .then((data) => {
+      console.log({ data }); // Handle the response data
+    })
+    .catch((error) => {
+      console.error(error); // Handle the error
+    });
 };
 
 export const getDealHistory = async () => {

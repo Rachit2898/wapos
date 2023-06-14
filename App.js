@@ -1,8 +1,16 @@
 import React, { useEffect } from "react";
-import { View, Text, ActivityIndicator, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StatusBar,
+  StyleSheet,
+  I18nManager,
+} from "react-native";
 import MyApp from "./src/route/sideMenu";
 import * as Updates from "expo-updates";
 import firebase from "firebase/app";
+import * as Localization from "expo-localization";
 import "firebase/auth";
 
 const firebaseConfig = {
@@ -23,6 +31,20 @@ if (!firebase.apps.length) {
 const App = () => {
   useEffect(() => {
     reactToUpdates();
+    const deviceLanguage = Localization.locale.split("-")[0];
+    console.log({ deviceLanguage }, Localization.getLocales()[0].textDirection);
+
+    const { textDirection } = Localization.getLocales()[0];
+
+    if (textDirection === "rtl") {
+      I18nManager.forceRTL(false);
+      I18nManager.allowRTL(false);
+      Localization.locale = "en";
+    } else {
+      I18nManager.forceRTL(false);
+      I18nManager.allowRTL(false);
+      Localization.locale = "en";
+    }
   }, []);
 
   const reactToUpdates = async () => {
@@ -34,11 +56,17 @@ const App = () => {
   };
 
   return (
-    <>
+    <View style={styles.container}>
       <StatusBar backgroundColor="#ffffff" />
       <MyApp />
-    </>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 export default App;
