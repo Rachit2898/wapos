@@ -347,7 +347,7 @@ export const getFlightDetails = async () => {
 };
 
 export const sendNotification = async (pushToken, text, heading) => {
-  await fetch("https://fcm.googleapis.com/fcm/send", {
+  const res = await fetch("https://fcm.googleapis.com/fcm/send", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -363,6 +363,7 @@ export const sendNotification = async (pushToken, text, heading) => {
       },
     }),
   });
+  console.log("Success", res);
 };
 
 export const sendIosNotification = async (pushToken, text, heading) => {
